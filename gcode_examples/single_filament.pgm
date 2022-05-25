@@ -1,0 +1,577 @@
+DVAR $hFile
+DVAR $cCheck
+DVAR $press
+DVAR $length
+DVAR $lame
+DVAR $comport
+DVAR $vacpress
+
+$DO0.0=0
+$DO1.0=0
+$DO2.0=0
+$DO3.0=0
+
+Primary ; sets primary units mm and s
+G65 F2000; accel speed mm/s^2
+G66 F2000;accel speed mm/s^2
+
+
+G91
+
+	; >>> PRINTING 15 DEVICES <<<
+
+Call setPress P5 Q48
+$strtask4="SIL4E6"
+Call omniSetInt P1
+	; [1-1] P=48.0 psi and v=1.84 mm/s | UV= 4 %
+G1 F1.843
+Call togglePress P5
+G4 P0.38
+Call omniOn P1
+G1 X30.000000
+Call togglePress P5
+G4 P0.25
+Call omniOff P1
+G1 X2.000000 Z-0.630000
+G1 F10
+G1 X2.000000
+G1 F10
+G1 Z10.630000
+G1 Y3.500000
+G1 X-34.000000
+G1 Z-10.000000
+	; [1-2] P=48.0 psi and v=1.84 mm/s | UV= 4 %
+G1 F1.843
+Call togglePress P5
+G4 P0.38
+Call omniOn P1
+G1 X30.000000
+Call togglePress P5
+G4 P0.25
+Call omniOff P1
+G1 X2.000000 Z-0.630000
+G1 F10
+G1 X2.000000
+G1 F10
+G1 Z10.630000
+G1 Y3.500000
+G1 X-34.000000
+G1 Z-10.000000
+	; [1-3] P=48.0 psi and v=1.84 mm/s | UV= 4 %
+G1 F1.843
+Call togglePress P5
+G4 P0.38
+Call omniOn P1
+G1 X30.000000
+Call togglePress P5
+G4 P0.25
+Call omniOff P1
+G1 X2.000000 Z-0.630000
+G1 F10
+G1 X2.000000
+G1 F10
+G1 Z10.630000
+G1 Y3.500000
+G1 X-34.000000
+G1 Z-10.000000
+	; [1-4] P=48.0 psi and v=1.84 mm/s | UV= 4 %
+G1 F1.843
+Call togglePress P5
+G4 P0.38
+Call omniOn P1
+G1 X30.000000
+Call togglePress P5
+G4 P0.25
+Call omniOff P1
+G1 X2.000000 Z-0.630000
+G1 F10
+G1 X2.000000
+G1 F10
+G1 Z10.630000
+G1 Y3.500000
+G1 X-34.000000
+G1 Z-10.000000
+	; [1-5] P=48.0 psi and v=1.84 mm/s | UV= 4 %
+G1 F1.843
+Call togglePress P5
+G4 P0.38
+Call omniOn P1
+G1 X30.000000
+Call togglePress P5
+G4 P0.25
+Call omniOff P1
+G1 X2.000000 Z-0.630000
+G1 F10
+G1 X2.000000
+G1 F10
+G1 Z10.630000
+G1 Y3.500000
+G1 X-34.000000
+G1 Z-10.000000
+G1 Y1.000000
+Call setPress P5 Q64
+$strtask4="SIL4E6"
+Call omniSetInt P1
+	; [2-1] P=64.0 psi and v=2.68 mm/s | UV= 4 %
+G1 F2.677
+Call togglePress P5
+G4 P0.26
+Call omniOn P1
+G1 X30.000000
+Call togglePress P5
+G4 P0.25
+Call omniOff P1
+G1 X2.000000 Z-0.630000
+G1 F10
+G1 X2.000000
+G1 F10
+G1 Z10.630000
+G1 Y3.500000
+G1 X-34.000000
+G1 Z-10.000000
+	; [2-2] P=64.0 psi and v=2.68 mm/s | UV= 4 %
+G1 F2.677
+Call togglePress P5
+G4 P0.26
+Call omniOn P1
+G1 X30.000000
+Call togglePress P5
+G4 P0.25
+Call omniOff P1
+G1 X2.000000 Z-0.630000
+G1 F10
+G1 X2.000000
+G1 F10
+G1 Z10.630000
+G1 Y3.500000
+G1 X-34.000000
+G1 Z-10.000000
+	; [2-3] P=64.0 psi and v=2.68 mm/s | UV= 4 %
+G1 F2.677
+Call togglePress P5
+G4 P0.26
+Call omniOn P1
+G1 X30.000000
+Call togglePress P5
+G4 P0.25
+Call omniOff P1
+G1 X2.000000 Z-0.630000
+G1 F10
+G1 X2.000000
+G1 F10
+G1 Z10.630000
+G1 Y3.500000
+G1 X-34.000000
+G1 Z-10.000000
+	; [2-4] P=64.0 psi and v=2.68 mm/s | UV= 4 %
+G1 F2.677
+Call togglePress P5
+G4 P0.26
+Call omniOn P1
+G1 X30.000000
+Call togglePress P5
+G4 P0.25
+Call omniOff P1
+G1 X2.000000 Z-0.630000
+G1 F10
+G1 X2.000000
+G1 F10
+G1 Z10.630000
+G1 Y3.500000
+G1 X-34.000000
+G1 Z-10.000000
+	; [2-5] P=64.0 psi and v=2.68 mm/s | UV= 4 %
+G1 F2.677
+Call togglePress P5
+G4 P0.26
+Call omniOn P1
+G1 X30.000000
+Call togglePress P5
+G4 P0.25
+Call omniOff P1
+G1 X2.000000 Z-0.630000
+G1 F10
+G1 X2.000000
+G1 F10
+G1 Z10.630000
+G1 Y3.500000
+G1 X-34.000000
+G1 Z-10.000000
+G1 Y1.000000
+Call setPress P5 Q80
+$strtask4="SIL4E6"
+Call omniSetInt P1
+	; [3-1] P=80.0 psi and v=3.58 mm/s | UV= 4 %
+G1 F3.575
+Call togglePress P5
+G4 P0.2
+Call omniOn P1
+G1 X30.000000
+Call togglePress P5
+G4 P0.25
+Call omniOff P1
+G1 X2.000000 Z-0.630000
+G1 F10
+G1 X2.000000
+G1 F10
+G1 Z10.630000
+G1 Y3.500000
+G1 X-34.000000
+G1 Z-10.000000
+	; [3-2] P=80.0 psi and v=3.58 mm/s | UV= 4 %
+G1 F3.575
+Call togglePress P5
+G4 P0.2
+Call omniOn P1
+G1 X30.000000
+Call togglePress P5
+G4 P0.25
+Call omniOff P1
+G1 X2.000000 Z-0.630000
+G1 F10
+G1 X2.000000
+G1 F10
+G1 Z10.630000
+G1 Y3.500000
+G1 X-34.000000
+G1 Z-10.000000
+	; [3-3] P=80.0 psi and v=3.58 mm/s | UV= 4 %
+G1 F3.575
+Call togglePress P5
+G4 P0.2
+Call omniOn P1
+G1 X30.000000
+Call togglePress P5
+G4 P0.25
+Call omniOff P1
+G1 X2.000000 Z-0.630000
+G1 F10
+G1 X2.000000
+G1 F10
+G1 Z10.630000
+G1 Y3.500000
+G1 X-34.000000
+G1 Z-10.000000
+	; [3-4] P=80.0 psi and v=3.58 mm/s | UV= 4 %
+G1 F3.575
+Call togglePress P5
+G4 P0.2
+Call omniOn P1
+G1 X30.000000
+Call togglePress P5
+G4 P0.25
+Call omniOff P1
+G1 X2.000000 Z-0.630000
+G1 F10
+G1 X2.000000
+G1 F10
+G1 Z10.630000
+G1 Y3.500000
+G1 X-34.000000
+G1 Z-10.000000
+	; [3-5] P=80.0 psi and v=3.58 mm/s | UV= 4 %
+G1 F3.575
+Call togglePress P5
+G4 P0.2
+Call omniOn P1
+G1 X30.000000
+Call togglePress P5
+G4 P0.25
+Call omniOff P1
+G1 X2.000000 Z-0.630000
+G1 F10
+G1 X2.000000
+G1 F10
+G1 Z10.630000
+G1 Y3.500000
+G1 X-34.000000
+G1 Z-10.000000
+G1 Y1.000000
+;#################################### Code ##########################################
+
+M2
+
+;##########Nordson Pressure Box Functions############;
+DFS setPress
+
+        $strtask1 = DBLTOSTR( $P, 0 )
+        $strtask1 = "COM" + $strtask1
+        $hFile = FILEOPEN $strtask1, 2
+        COMMINIT $hFile, "baud=115200 parity=N data=8 stop=1"
+        COMMSETTIMEOUT $hFile, -1, -1, 1000
+
+        $press = $Q * 10.0
+        $strtask2 = DBLTOSTR( $press , 0 )
+
+
+        $length = STRLEN( $strtask2 )
+        WHILE $length < 4.0
+                $strtask2 = "0" + $strtask2
+                $length = STRLEN( $strtask2 )
+        ENDWHILE
+
+
+        $strtask2 = "08PS  " + $strtask2
+
+        $cCheck = 0.00
+        $lame = STRTOASCII ($strtask2, 0)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 1)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 2)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 3)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 4)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 5)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 6)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 7)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 8)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 9)
+        $cCheck = $cCheck - $lame
+
+        WHILE( $cCheck) < 0
+                $cCheck = $cCheck + 256
+        ENDWHILE
+
+
+        $strtask3 = makestring "{#H}" $cCheck
+        $strtask3 = STRUPR( $strtask3 )
+        $strtask2 = "\x02" + $strtask2 + $strtask3 + "\x03"
+
+        FILEWRITE $hFile "\x05"
+        FILEWRITE $hFile $strtask2
+        FILEWRITE $hFile "\x04"
+
+
+        FILECLOSE $hFile
+
+
+ENDDFS
+
+DFS setVac
+
+        $strtask1 = DBLTOSTR( $P, 0 )
+        $strtask1 = "COM" + $strtask1
+        $hFile = FILEOPEN $strtask1, 2
+        COMMINIT $hFile, "baud=115200 parity=N data=8 stop=1"
+        COMMSETTIMEOUT $hFile, -1, -1, 1000
+
+        $vacpress = $Q * 10.0
+        $strtask2 = DBLTOSTR( $vacpress , 0 )
+
+
+        $length = STRLEN( $strtask2 )
+        WHILE $length < 4.0
+                $strtask2 = "0" + $strtask2
+                $length = STRLEN( $strtask2 )
+        ENDWHILE
+
+
+        $strtask2 = "08VS  " + $strtask2
+
+        $cCheck = 0.00
+        $lame = STRTOASCII ($strtask2, 0)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 1)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 2)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 3)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 4)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 5)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 6)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 7)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 8)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 9)
+        $cCheck = $cCheck - $lame
+
+        WHILE( $cCheck) < 0
+                $cCheck = $cCheck + 256
+        ENDWHILE
+
+
+        $strtask3 = makestring "{#H}" $cCheck
+        $strtask3 = STRUPR( $strtask3 )
+        $strtask2 = "\x02" + $strtask2 + $strtask3 + "\x03"
+
+        FILEWRITE $hFile "\x05"
+        FILEWRITE $hFile $strtask2
+        FILEWRITE $hFile "\x04"
+
+
+        FILECLOSE $hFile
+
+
+ENDDFS
+
+DFS togglePress
+
+        $strtask1 = DBLTOSTR( $P, 0 )
+        $strtask1 = "COM" + $strtask1
+        $hFile = FILEOPEN $strtask1, 2
+        COMMINIT $hFile, "baud=115200 parity=N data=8 stop=1"
+        COMMSETTIMEOUT $hFile, -1, -1, 1000
+
+
+        $strtask2 = "04DI  "
+
+        $cCheck = 0.00
+        $lame = STRTOASCII ($strtask2, 0)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 1)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 2)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 3)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 4)
+        $cCheck = $cCheck - $lame
+        $lame = STRTOASCII( $strtask2, 5)
+        $cCheck = $cCheck - $lame
+
+        WHILE( $cCheck) < 0
+                $cCheck = $cCheck + 256
+        ENDWHILE
+
+
+        $strtask3 = makestring "{#H}" $cCheck
+        $strtask3 = STRUPR( $strtask3 )
+        $strtask2 = "\x02" + $strtask2 + $strtask3 + "\x03"
+
+        FILEWRITE $hFile "\x05"
+        FILEWRITE $hFile $strtask2
+        FILEWRITE $hFile "\x04"
+
+
+        FILECLOSE $hFile
+        G4 P0.15
+
+ENDDFS
+
+;##########Omnicure Functions############;
+DFS omniOn
+
+        $strtask1 = DBLTOSTR( $P, 0 )
+        $strtask1 = "COM" + $strtask1
+        $hFile = FILEOPEN $strtask1, 2
+        COMMINIT $hFile, "baud=19200 parity=N data=8 stop=1"
+        COMMSETTIMEOUT $hFile, -1, -1, 1000
+
+        FILEWRITENOTERM $hFile "CONN18\x0D"
+        FILEREAD $hFile, 0, $strtask2
+        WHILE STRCMP($strtask2,"READY0A",0)
+                FILEWRITENOTERM $hFile "CONN18\x0D"
+                FILEREAD $hFile, 0, $strtask2
+        ENDWHILE
+
+        FILEWRITENOTERM $hFile "OPN40\x0D"
+        FILEREAD $hFile, 0, $strtask2
+        WHILE STRCMP($strtask2,"ReceivedBF",0)
+                FILEWRITENOTERM $hFile "OPN40\x0D"
+                FILEREAD $hFile, 0, $strtask2
+        ENDWHILE
+
+        FILEWRITENOTERM $hFile "DCONE1\x0D"
+        FILEREAD $hFile, 0, $strtask2
+        WHILE STRCMP($strtask2,"CLOSED42",0)
+                FILEWRITENOTERM $hFile "DCONE1\x0D"
+                FILEREAD $hFile, 0, $strtask2
+        ENDWHILE
+        FILECLOSE $hFile
+
+ENDDFS
+
+DFS omniOff
+
+        $strtask1 = DBLTOSTR( $P, 0 )
+        $strtask1 = "COM" + $strtask1
+        $hFile = FILEOPEN $strtask1, 2
+        COMMINIT $hFile, "baud=19200 parity=N data=8 stop=1"
+        COMMSETTIMEOUT $hFile, -1, -1, 1000
+
+        FILEWRITENOTERM $hFile "CONN18\x0D"
+        FILEREAD $hFile, 0, $strtask2
+        WHILE STRCMP($strtask2,"READY0A",0)
+                FILEWRITENOTERM $hFile "CONN18\x0D"
+                FILEREAD $hFile, 0, $strtask2
+        ENDWHILE
+
+        FILEWRITENOTERM $hFile "CLS3A\x0D"
+        FILEREAD $hFile, 0, $strtask2
+        WHILE STRCMP($strtask2,"ReceivedBF",0)
+                FILEWRITENOTERM $hFile "CLS3A\x0D"
+                FILEREAD $hFile, 0, $strtask2
+        ENDWHILE
+
+        FILEWRITENOTERM $hFile "DCONE1\x0D"
+        FILEREAD $hFile, 0, $strtask2
+        WHILE STRCMP($strtask2,"CLOSED42",0)
+                FILEWRITENOTERM $hFile "DCONE1\x0D"
+                FILEREAD $hFile, 0, $strtask2
+        ENDWHILE
+        FILECLOSE $hFile
+
+ENDDFS
+
+DFS omniSetInt
+
+        $strtask1 = DBLTOSTR( $P, 0 )
+        $strtask1 = "COM" + $strtask1
+        $hFile = FILEOPEN $strtask1, 2
+        COMMINIT $hFile, "baud=19200 parity=N data=8 stop=1"
+        COMMSETTIMEOUT $hFile, -1, -1, 1000
+
+        FILEWRITENOTERM $hFile "CONN18\x0D"
+        FILEREAD $hFile, 0, $strtask2
+        WHILE STRCMP($strtask2,"READY0A",0)
+                FILEWRITENOTERM $hFile "CONN18\x0D"
+                FILEREAD $hFile, 0, $strtask2
+        ENDWHILE
+
+        $strtask4 = $strtask4 + "\x0D"
+        FILEWRITENOTERM $hFile $strtask4
+        FILEREAD $hFile, 0, $strtask2
+        WHILE STRCMP($strtask2,"ReceivedBF",0)
+                FILEWRITENOTERM $hFile $strtask4
+                FILEREAD $hFile, 0, $strtask2
+        ENDWHILE
+
+        FILEWRITENOTERM $hFile "DCONE1\x0D"
+        FILEREAD $hFile, 0, $strtask2
+        WHILE STRCMP($strtask2,"CLOSED42",0)
+                FILEWRITENOTERM $hFile "DCONE1\x0D"
+                FILEREAD $hFile, 0, $strtask2
+        ENDWHILE
+        FILECLOSE $hFile
+
+ENDDFS
+
+;##########Alicat Functions############;
+DFS setAlicatPress
+
+        $strtask1 = DBLTOSTR( $P, 0 )
+        $strtask1 = "COM" + $strtask1
+        $hFile = FILEOPEN $strtask1, 2
+        COMMINIT $hFile, "baud=19200 parity=N data=8 stop=1"
+        COMMSETTIMEOUT $hFile, -1, -1, 1000
+
+        $strtask2 = DBLTOSTR($Q,2)
+        $strtask3 = "AS" + $strtask2 + "\x0D"
+        FILEWRITENOTERM $hFile $strtask3
+        FILECLOSE $hFile
+
+ENDDFS
+
+
