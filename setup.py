@@ -5,7 +5,7 @@ with open("README.md", "r") as readme_file:
     readme = readme_file.read()
 
 INFO = {'name': 'mecode_viewer',
-        'version': '0.0.1',
+        'version': '0.0.2',
         'description': 'Simple GCode Viewer',
         'author': 'Rodrigo Telles',
         'author_email': 'rtelles@g.harvard.edu',
