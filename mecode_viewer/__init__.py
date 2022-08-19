@@ -1,0 +1,1 @@
+from mecode_viewer.main import mecode_viewer

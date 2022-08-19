@@ -15,6 +15,9 @@ import os
 
 
 def mecode_viewer(file_name):
+    '''
+        file_name (str): name of gcode file
+    '''
     # variables
     REL_MODE = True
 
