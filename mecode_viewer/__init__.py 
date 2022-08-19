@@ -1,1 +1,1 @@
-from.main import mecode_viewer
+from .main import mecode_viewer
