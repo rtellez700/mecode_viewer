@@ -1,4 +1,8 @@
+from os import read
 from setuptools import setup, find_packages
+
+with open("README.md", "r") as readme_file:
+    readme = readme_file.read()
 
 INFO = {'name': 'mecode_viewer',
         'version': '0.0.1',
@@ -11,6 +15,8 @@ setup(
     name=INFO['name'],
     version=INFO['version'],
     description=INFO['description'],
+    long_description=readme,
+    long_description_content_type='text/markdown',
     author=INFO['author'],
     author_email=INFO['author_email'],
     packages=find_packages(),
@@ -21,6 +27,7 @@ setup(
     package_data = {
         '': ['*.txt', '*.md'],
     },
+    license="MIT",
     install_requires=[
         'numpy',
         'matplotlib',
