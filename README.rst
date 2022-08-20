@@ -26,7 +26,22 @@ Simple GCode Viewer
 Features
 --------
 
-* TODO
+## Installation
+```
+    pip install git+https://github.com/rtellez700/mecode_viewer.git
+```
+
+## Upgrading
+```
+    pip install git+https://github.com/rtellez700/mecode_viewer.git --upgrade
+```
+
+## Example
+```
+    import mecode_viewer.mecode_viewer as mecode_viewer
+
+    mecode_viewer(<file_name_here>)
+```
 
 Credits
 -------
