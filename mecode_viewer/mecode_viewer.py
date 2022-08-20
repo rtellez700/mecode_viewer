@@ -1,3 +1,4 @@
+"""Main module."""
 from os.path import isfile
 from typing import Mapping
 from mpl_toolkits import mplot3d
@@ -189,8 +190,8 @@ def get_print_move(line, prev_move):
         return (X,Y,Z), PRINT_SPEED
 
 
-if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        print('Please provide input file')
-    elif os.path.isfile(sys.argv[1]):
-        mecode_viewer(file_name=sys.argv[1])
+# if __name__ == "__main__":
+#     if len(sys.argv) == 1:
+#         print('Please provide input file')
+#     elif os.path.isfile(sys.argv[1]):
+#         mecode_viewer(file_name=sys.argv[1])

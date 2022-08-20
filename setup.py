@@ -1,40 +1,51 @@
-from os import read
+#!/usr/bin/env python
+
+"""The setup script."""
+
 from setuptools import setup, find_packages
 
-from mecode_viewer.main import mecode_viewer
-
-with open("README.md", "r") as readme_file:
+with open('README.rst') as readme_file:
     readme = readme_file.read()
 
-INFO = {'name': 'mecode_viewer',
-        'version': '0.0.2',
-        'description': 'Simple GCode Viewer',
-        'author': 'Rodrigo Telles',
-        'author_email': 'rtelles@g.harvard.edu',
-        }
+with open('HISTORY.rst') as history_file:
+    history = history_file.read()
+
+requirements = [
+    'numpy', 'matplotlib'
+]
+
+test_requirements = [ ]
 
 setup(
-    name=INFO['name'],
-    version=INFO['version'],
-    description=INFO['description'],
-    long_description=readme,
-    long_description_content_type='text/markdown',
-    author=INFO['author'],
-    author_email=INFO['author_email'],
-    packages=find_packages(include=['mecode_viewer', 'mecode_viewer.*']),
+    author="Rodrigo Telles",
+    author_email='rtelles@g.harvard.edu',
     python_requires='>=3.6',
-    url='https://github.com/rtellez700/mecode_viewer.git',
-    download_url='https://github.com/rtellez700/mecode_viewer/tarball/master',
-    keywords=['gcode', '3dprinting', 'cnc', 'reprap', 'additive'],
-    zip_safe=False,
-    package_data = {
-        '': ['*.txt', '*.md'],
-    },
-    license="MIT license",
-    install_requires=[
-        'numpy',
-        'matplotlib',
-        # 'solidpython',
-        # 'vpython',
+    classifiers=[
+        'Development Status :: 2 - Pre-Alpha',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Natural Language :: English',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
+    description="Simple GCode Viewer",
+    entry_points={
+        'console_scripts': [
+            'mecode_viewer=mecode_viewer.cli:main',
+        ],
+    },
+    install_requires=requirements,
+    license="MIT license",
+    long_description=readme + '\n\n' + history,
+    include_package_data=True,
+    keywords='mecode_viewer',
+    name='mecode_viewer',
+    packages=find_packages(include=['mecode_viewer', 'mecode_viewer.*']),
+    test_suite='tests',
+    tests_require=test_requirements,
+    url='https://github.com/rtellez700/mecode_viewer',
+    version='0.1.0',
+    zip_safe=False,
 )
