@@ -11,16 +11,13 @@ import re
 import sys
 import os
 
-
-
-
-
-def mecode_viewer(file_name):
+def mecode_viewer(file_name, mode):
     '''
         file_name (str): name of gcode file
+        mode (str): rel (relative) or abs (absolute)
     '''
     # variables
-    REL_MODE = True
+    REL_MODE = True if mode == 'rel' else False
 
     ACCEL_RATE = 2000
     DECEL_RATE = 2000
