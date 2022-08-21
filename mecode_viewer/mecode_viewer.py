@@ -11,7 +11,7 @@ import re
 import sys
 import os
 
-def mecode_viewer(file_name, mode):
+def mecode_viewer(file_name, mode, verbose=False):
     '''
         file_name (str): name of gcode file
         mode (str): rel (relative) or abs (absolute)
@@ -114,6 +114,9 @@ def mecode_viewer(file_name, mode):
         if h['PRINTING']:
             ax.plot3D(x_pts, y_pts, z_pts, **fmt)
     plt.show()
+
+    if verbose:
+        return history
 
 def get_accel_decel(line, accel, decel):
 
