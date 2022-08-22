@@ -116,7 +116,7 @@ def mecode_viewer(file_name, mode, verbose=False):
     plt.show()
 
     if verbose:
-        return history
+        return ax, history
 
 def get_accel_decel(line, accel, decel):
 
