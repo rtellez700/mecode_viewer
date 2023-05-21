@@ -11,7 +11,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'numpy', 'matplotlib'
+    'numpy', 'matplotlib', 'gcode_helpers', 'vpython'
 ]
 
 test_requirements = [ ]
@@ -46,6 +46,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/rtellez700/mecode_viewer',
-    version='0.1.3',
+    version='0.1.4',
     zip_safe=False,
 )
