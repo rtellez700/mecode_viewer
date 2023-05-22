@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from gcode_helpers import get_accel_decel, get_print_mode, get_pressure_config, get_print_move, are_we_printing
 import numpy as np
 
-def mecode_viewer(file_name, mode, backend='matplotlib', d_N=1, verbose=False, **kwargs):
+def mecode_viewer(file_name, mode, backend='matplotlib', verbose=False, **kwargs):
     '''
         file_name (str): name of gcode file
         mode (str): rel (relative) or abs (absolute)
@@ -146,6 +146,8 @@ def plot3d(history, outfile=None):
     else:
         fig.savefig(outfile, dpi=500)
 
+
+
 def animation(history, outfile=None, hide_travel=False,color_on=True, nozzle_cam=False,
              fast_forward = 3, framerate = 60, nozzle_dims=[1.0,20.0], 
              substrate_dims=[0.0,0.0,-1.0,300,1,300], scene_dims = [720,720]):
@@ -204,9 +206,9 @@ def animation(history, outfile=None, hide_travel=False,color_on=True, nozzle_cam
             format: [width, height]
 
         """
-        import matplotlib.cm as cm
-        from mpl_toolkits.mplot3d import Axes3D
-        import matplotlib.pyplot as plt
+        # import matplotlib.cm as cm
+        # from mpl_toolkits.mplot3d import Axes3D
+
         position_history = [d['COORDS'] for d in history]
         extruding_history = [d['PRINTING'] for d in history]
         speed_history = [d['PRINT_SPEED'] for d in history]
@@ -379,10 +381,34 @@ def animation(history, outfile=None, hide_travel=False,color_on=True, nozzle_cam
                 color=vp.color.gray(0.8),
                 opacity=0.3)
         
-        vp.scene.waitfor('click')
+        # vp.scene.waitfor('click')
         
-        for xyz, is_extruding in zip(position_history, extruding_history):
-            head.abs_move(vp.vec(*xyz), feed=1, print_line=is_extruding, tail_color=vp.color.red)
+        running = True
+        frame = 1
+
+        def Run(b):
+            nonlocal running
+            print(running, '>>> inside Run 2')
+            running = not running
+            print(running, '>>> inside Run - reassign')
+            if running:
+                b.text = "Pause"
+            else:
+                b.text = "Run"
+
+        vp.button(text="Run", pos=vp.scene.title_anchor, bind=Run)
+
+
+        while True:
+            if running:
+                head.abs_move(endpoint=vp.vec(*position_history[frame]),
+                                feed=speed_history[frame],
+                                print_line=extruding_history[frame],
+                                tail_color=vp.color.red)
+                frame += 1
+
+        # for xyz, is_extruding in zip(position_history, extruding_history):
+        #     head.abs_move(vp.vec(*xyz), feed=1, print_line=is_extruding, tail_color=vp.color.red)
 
 
 
@@ -404,5 +430,5 @@ def animation(history, outfile=None, hide_travel=False,color_on=True, nozzle_cam
 # mecode_viewer(file_name='../jlab_tests/gcode_examples/re-entrant__1x1_10mmx10mm_25layers__0.5dN_0.4dz_1passes_-2taper.pgm',
 #               mode='abs', backend='vpython', nozzle_dims=[0.5,10])
 
-# mecode_viewer(file_name='../jlab_tests/gcode_examples/re-entrant__3x3_30mmx30mm_25layers__0.5dN_0.4dz_1passes_-2taper.pgm',
-#               mode='abs', backend='vpython', nozzle_dims=[0.5,10])
+mecode_viewer(file_name='../jlab_tests/gcode_examples/re-entrant__3x3_30mmx30mm_25layers__0.5dN_0.4dz_1passes_-2taper.pgm',
+              mode='abs', backend='vpython', nozzle_dims=[0.5,10])
