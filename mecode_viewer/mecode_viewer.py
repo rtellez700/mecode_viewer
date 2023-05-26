@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from gcode_helpers import get_accel_decel, get_print_mode, get_pressure_config, get_print_move, are_we_printing
 import numpy as np
 
-def mecode_viewer(file_name, mode, backend='matplotlib', verbose=False, **kwargs):
+def mecode_viewer(file_name, mode='abs', backend='matplotlib', verbose=False, **kwargs):
     '''
         file_name (str): name of gcode file
         mode (str): rel (relative) or abs (absolute)
@@ -38,42 +38,45 @@ def mecode_viewer(file_name, mode, backend='matplotlib', verbose=False, **kwargs
 
     move_counter = 1
 
-    # with open('./gcode_examples/single_filament.pgm') as f:
-    # with open('./gcode_examples/meander.pgm') as f:
-    # with open('./gcode_examples/60deg_0.6rw_strand-center_T26C_prod.pgm') as f:
-    # with open('./gcode_examples/dogbone.pgm') as f:
-    with open(file_name) as f:
-        for line in f:
-            if line.strip().startswith(';') != ';': 
-                # print('counter -- ', move_counter)
-                # identify if gcode is in relative mode
-                REL_MODE = get_print_mode(line, REL_MODE)
+    if isfile(file_name):
+        with open(file_name, 'r') as f:
+            file_contents = f.readlines()
+    elif isinstance(file_name, str):
+        file_contents = file_name
+    else:
+        print('file_name is neither a file nor a string...')
 
-                # set accel and decel rates
-                ACCEL_RATE, DECEL_RATE = get_accel_decel(line, ACCEL_RATE, DECEL_RATE)
+    for line in file_contents:
+        if line.strip().startswith(';') != ';': 
+            # print('counter -- ', move_counter)
+            # identify if gcode is in relative mode
+            REL_MODE = get_print_mode(line, REL_MODE)
 
-                # get pressure config
-                PRESSURE, P_COM_PORT = get_pressure_config(line, PRESSURE, P_COM_PORT)
+            # set accel and decel rates
+            ACCEL_RATE, DECEL_RATE = get_accel_decel(line, ACCEL_RATE, DECEL_RATE)
 
-                # are we printing?
-                PRINTING = are_we_printing(line, PRINTING)
+            # get pressure config
+            PRESSURE, P_COM_PORT = get_pressure_config(line, PRESSURE, P_COM_PORT)
 
-                # GET PRINT SPEED
-                if 'G1' in line:
-                    COORDS, PRINT_SPEED = get_print_move(line, history[move_counter-1])
+            # are we printing?
+            PRINTING = are_we_printing(line, PRINTING)
 
-                    if COORDS is not None:
-                        history.append({
-                            'REL_MODE': REL_MODE,
-                            'ACCEL' : ACCEL_RATE,
-                            'DECEL' : DECEL_RATE,
-                            'P' : PRESSURE,
-                            'P_COM_PORT': P_COM_PORT,
-                            'PRINTING': PRINTING,
-                            'COORDS': COORDS,
-                            'PRINT_SPEED' : PRINT_SPEED
-                        })
-                        move_counter += 1
+            # GET PRINT SPEED
+            if 'G1' in line:
+                COORDS, PRINT_SPEED = get_print_move(line, history[move_counter-1])
+
+                if COORDS is not None:
+                    history.append({
+                        'REL_MODE': REL_MODE,
+                        'ACCEL' : ACCEL_RATE,
+                        'DECEL' : DECEL_RATE,
+                        'P' : PRESSURE,
+                        'P_COM_PORT': P_COM_PORT,
+                        'PRINTING': PRINTING,
+                        'COORDS': COORDS,
+                        'PRINT_SPEED' : PRINT_SPEED
+                    })
+                    move_counter += 1
 
     if backend == 'matplotlib':
         plot3d(history, **kwargs)
