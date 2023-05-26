@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from gcode_helpers import get_accel_decel, get_print_mode, get_pressure_config, get_print_move, are_we_printing
 import numpy as np
 
-def mecode_viewer(file_name, mode='abs', backend='matplotlib', verbose=False, **kwargs):
+def mecode_viewer(file_name, mode='abs', backend='matplotlib', verbose=False, raw_gcode=None, **kwargs):
     '''
         file_name (str): name of gcode file
         mode (str): rel (relative) or abs (absolute)
@@ -38,11 +38,11 @@ def mecode_viewer(file_name, mode='abs', backend='matplotlib', verbose=False, **
 
     move_counter = 1
 
-    if isfile(file_name):
+    if raw_gcode is not None:
+        file_contents = raw_gcode
+    elif isfile(file_name):
         with open(file_name, 'r') as f:
             file_contents = f.readlines()
-    elif isinstance(file_name, str):
-        file_contents = file_name
     else:
         print('file_name is neither a file nor a string...')
 
