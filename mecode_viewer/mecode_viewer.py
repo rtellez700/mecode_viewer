@@ -386,20 +386,18 @@ def animation(history, outfile=None, hide_travel=False,color_on=True, nozzle_cam
         
         # vp.scene.waitfor('click')
         
-        running = True
+        running = False
         frame = 1
 
         def Run(b):
             nonlocal running
-            print(running, '>>> inside Run 2')
             running = not running
-            print(running, '>>> inside Run - reassign')
             if running:
                 b.text = "Pause"
             else:
                 b.text = "Run"
 
-        vp.button(text="Run", pos=vp.scene.title_anchor, bind=Run)
+        vp.button(text="Pause" if running else "Run" , pos=vp.scene.title_anchor, bind=Run)
 
 
         while True:
