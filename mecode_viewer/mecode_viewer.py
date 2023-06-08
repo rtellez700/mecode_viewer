@@ -88,7 +88,7 @@ def mecode_viewer(file_name, mode='abs', backend='matplotlib', verbose=False, ra
     if verbose:
         return history
 
-def plot3d(history, outfile=None):
+def plot3d(history, outfile=None, **kwargs):
     fig = plt.figure(dpi=150)
     ax = plt.axes(projection='3d')
 
@@ -431,5 +431,10 @@ def animation(history, outfile=None, hide_travel=False,color_on=True, nozzle_cam
 # mecode_viewer(file_name='../jlab_tests/gcode_examples/re-entrant__1x1_10mmx10mm_25layers__0.5dN_0.4dz_1passes_-2taper.pgm',
 #               mode='abs', backend='vpython', nozzle_dims=[0.5,10])
 
+'''static example'''
+mecode_viewer(file_name='../jlab_tests/gcode_examples/re-entrant__3x3_30mmx30mm_25layers__0.5dN_0.4dz_1passes_-2taper.pgm',
+              mode='abs', backend='matplotlib', nozzle_dims=[0.5,10])
+
+'''animation'''
 # mecode_viewer(file_name='../jlab_tests/gcode_examples/re-entrant__3x3_30mmx30mm_25layers__0.5dN_0.4dz_1passes_-2taper.pgm',
 #               mode='abs', backend='vpython', nozzle_dims=[0.5,10])
