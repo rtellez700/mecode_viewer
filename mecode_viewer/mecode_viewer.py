@@ -39,8 +39,11 @@ def mecode_viewer(file_name, mode='abs', backend='matplotlib', verbose=False, ra
     move_counter = 1
 
     if raw_gcode is not None:
+        print('raw gcode')
         file_contents = raw_gcode
-    elif isfile(file_name):
+    # elif isfile(file_name):
+    elif len(file_name) > 0:
+        print('openning file')
         with open(file_name, 'r') as f:
             file_contents = f.readlines()
     else:
@@ -88,7 +91,7 @@ def mecode_viewer(file_name, mode='abs', backend='matplotlib', verbose=False, ra
     if verbose:
         return history
 
-def plot3d(history, outfile=None):
+def plot3d(history, outfile=None, **kwargs):
     fig = plt.figure(dpi=150)
     ax = plt.axes(projection='3d')
 
@@ -149,11 +152,9 @@ def plot3d(history, outfile=None):
     else:
         fig.savefig(outfile, dpi=500)
 
-
-
 def animation(history, outfile=None, hide_travel=False,color_on=True, nozzle_cam=False,
              fast_forward = 3, framerate = 60, nozzle_dims=[1.0,20.0], 
-             substrate_dims=[0.0,0.0,-1.0,300,1,300], scene_dims = [720,720]):
+             substrate_dims=[0.0,0.0,-1.0,300,1,300], scene_dims = [720,720], **kwargs):
         """ View the generated Gcode.
 
         Parameters
@@ -432,4 +433,4 @@ def animation(history, outfile=None, hide_travel=False,color_on=True, nozzle_cam
 #               mode='abs', backend='vpython', nozzle_dims=[0.5,10])
 
 # mecode_viewer(file_name='../jlab_tests/gcode_examples/re-entrant__3x3_30mmx30mm_25layers__0.5dN_0.4dz_1passes_-2taper.pgm',
-#               mode='abs', backend='vpython', nozzle_dims=[0.5,10])
+#               mode='abs', backend='matplotlib', nozzle_dims=[0.5,10])
