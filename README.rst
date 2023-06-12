@@ -26,6 +26,19 @@ Simple GCode Viewer
 Features
 --------
 
+## Basic Use
+
+
+```python
+from mecode_viewer import mecode_viewer
+
+mecode_viewer(file_name='gcode_file.pgm') # simplest case
+
+mecode_viewer(file_name='gcode_file.pgm', rel_mode=True) # specify relative coordinates are being used
+
+mecode_viewer(file_name='gcode_file.pgm', animation=True) # show vpython 3D animation
+```
+
 ## Installation
 ```
     pip install git+https://github.com/rtellez700/mecode_viewer.git
