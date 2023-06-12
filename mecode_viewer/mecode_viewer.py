@@ -1,19 +1,36 @@
 """Main module."""
 from os.path import isfile
-from typing import Mapping
+from typing import Mapping, List, Optional, Dict
 from mpl_toolkits import mplot3d
 import numpy as np
 import matplotlib.pyplot as plt
 from gcode_helpers import get_accel_decel, get_print_mode, get_pressure_config, get_print_move, are_we_printing
 import numpy as np
 
-def mecode_viewer(file_name, mode='abs', backend='matplotlib', verbose=False, raw_gcode=None, **kwargs):
-    '''
-        file_name (str): name of gcode file
-        mode (str): rel (relative) or abs (absolute)
+def mecode_viewer(file_name: str, rel_mode: bool=False, animation: bool=False, verbose: bool=False, raw_gcode: List[str]=None, **kwargs) -> Optional[List[Dict]]:
+    '''Visualize gcode file
+
+        Args:
+            file_name (str): name of gcode file
+            rel_mode (bool): True if relative coordinates, False if absolute coordinates
+            animation (bool): True for 3D animation, False for static matplotlib figure
+            verbose (bool): If True, will return print history as a list of dict's
+            raw_gcode (List[str]): Can provide list of gcode str commands in lieu of file_name
+
+        Returns:
+            Optional[List[Dict]]: If verbose is true, will return print history
+
+        Examples:
+            >>> mecode_viewer(file_name='gcode_file.pgm') # simplest case
+
+            >>> mecode_viewer(file_name='gcode_file.pgm', rel_mode=True) # specify relative coordinates are being used
+
+            >>> mecode_viewer(file_name='gcode_file.pgm', animation=True) # show vpython 3D animation
+
+
     '''
     # variables
-    REL_MODE = True if mode == 'rel' else False
+    REL_MODE = rel_mode #True if mode == 'rel' else False
 
     ACCEL_RATE = 2000
     DECEL_RATE = 2000
@@ -81,12 +98,12 @@ def mecode_viewer(file_name, mode='abs', backend='matplotlib', verbose=False, ra
                     })
                     move_counter += 1
 
-    if backend == 'matplotlib':
+    if not animation:
         plot3d(history, **kwargs)
-    elif backend == 'vpython':
+    elif animation:
         animation(history, **kwargs)
     else:
-        raise Exception("Invalid plotting backend! Choose one of mayavi or matplotlib or matplotlib2d or vpython.")
+        raise ValueError("Invalid plotting backend! Choose one of mayavi or matplotlib or matplotlib2d or vpython.")
     
     if verbose:
         return history
@@ -433,8 +450,8 @@ def animation(history, outfile=None, hide_travel=False,color_on=True, nozzle_cam
 #               mode='abs', backend='vpython', nozzle_dims=[0.5,10])
 
 '''static example'''
-mecode_viewer(file_name='../jlab_tests/gcode_examples/re-entrant__3x3_30mmx30mm_25layers__0.5dN_0.4dz_1passes_-2taper.pgm',
-              mode='abs', backend='matplotlib', nozzle_dims=[0.5,10])
+# mecode_viewer(file_name='../jlab_tests/gcode_examples/re-entrant__3x3_30mmx30mm_25layers__0.5dN_0.4dz_1passes_-2taper.pgm',
+#               mode='abs', backend='matplotlib', nozzle_dims=[0.5,10])
 
 '''animation'''
 # mecode_viewer(file_name='../jlab_tests/gcode_examples/re-entrant__3x3_30mmx30mm_25layers__0.5dN_0.4dz_1passes_-2taper.pgm',
