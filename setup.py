@@ -38,6 +38,7 @@ setup(
     },
     install_requires=requirements,
     license="MIT license",
+    long_description_content_type='text/x-rst',
     long_description=readme + '\n\n' + history,
     include_package_data=True,
     keywords='mecode_viewer',
@@ -46,6 +47,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/rtellez700/mecode_viewer',
-    version='0.1.11',
+    version='0.1.12',
     zip_safe=False,
 )

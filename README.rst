@@ -4,20 +4,18 @@ mecode_viewer
 
 
 .. image:: https://img.shields.io/pypi/v/mecode_viewer.svg
-        :target: https://pypi.python.org/pypi/mecode_viewer
+   :target: https://pypi.python.org/pypi/mecode_viewer
 
 .. image:: https://img.shields.io/travis/rtellez700/mecode_viewer.svg
-        :target: https://travis-ci.com/rtellez700/mecode_viewer
+   :target: https://travis-ci.com/rtellez700/mecode_viewer
 
 .. image:: https://readthedocs.org/projects/mecode-viewer/badge/?version=latest
-        :target: https://mecode-viewer.readthedocs.io/en/latest/?version=latest
-        :alt: Documentation Status
-
-
+   :target: https://mecode-viewer.readthedocs.io/en/latest/?version=latest
+   :alt: Documentation Status
 
 
 Simple GCode Viewer
-
+-------------------
 
 * Free software: MIT license
 * Documentation: https://mecode-viewer.readthedocs.io.
@@ -26,35 +24,28 @@ Simple GCode Viewer
 Features
 --------
 
-## Basic Use
+Installation
+------------
 
+.. code-block:: bash
 
-```python
-from mecode_viewer import mecode_viewer
+   pip install git+https://github.com/rtellez700/mecode_viewer.git
 
-mecode_viewer(file_name='gcode_file.pgm') # simplest case
+Upgrading
+---------
 
-mecode_viewer(file_name='gcode_file.pgm', rel_mode=True) # specify relative coordinates are being used
+.. code-block:: bash
 
-mecode_viewer(file_name='gcode_file.pgm', animation=True) # show vpython 3D animation
-```
+   pip install git+https://github.com/rtellez700/mecode_viewer.git --upgrade
 
-## Installation
-```
-    pip install git+https://github.com/rtellez700/mecode_viewer.git
-```
+Example
+-------
 
-## Upgrading
-```
-    pip install git+https://github.com/rtellez700/mecode_viewer.git --upgrade
-```
+.. code-block:: python
 
-## Example
-```
-    import mecode_viewer.mecode_viewer as mecode_viewer
+   import mecode_viewer.mecode_viewer as mecode_viewer
 
-    mecode_viewer(<file_name_here>)
-```
+   mecode_viewer(<file_name_here>)
 
 Credits
 -------
