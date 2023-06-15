@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from gcode_helpers import get_accel_decel, get_print_mode, get_pressure_config, get_print_move, are_we_printing
 import numpy as np
+from typing import List, Optional
 
 def mecode_viewer(file_name: str, rel_mode: bool=False, animation: bool=False, verbose: bool=False, raw_gcode: List[str]=None, **kwargs) -> Optional[List[Dict]]:
     '''Visualize gcode file
@@ -108,7 +109,16 @@ def mecode_viewer(file_name: str, rel_mode: bool=False, animation: bool=False, v
     if verbose:
         return history
 
-def plot3d(history, outfile=None, **kwargs):
+def plot3d(history: List[dict], outfile:Optional[str] =None, mecode:Optional[bool] =False, **kwargs) -> None:
+    '''Generates a 3D matplotlib figure.
+
+        Args:
+            - history (List[dict]): List of printing, speed, color, extrusion, etc... history
+            - outfile (str): If specified, will save 3D matplotlib figure locally at `outfile`
+            - mecode (bool): If False will not attempt to calculate absolute coordinates from relative points. Mecode by default does this conversion for us
+
+    
+    '''
     fig = plt.figure(dpi=150)
     ax = plt.axes(projection='3d')
 
@@ -130,7 +140,7 @@ def plot3d(history, outfile=None, **kwargs):
             'c': (0,0,1,0.6) if h['PRINTING'] else 'k',
             'lw': .5 if h['PRINTING'] else 1
         }
-        if h['REL_MODE']:
+        if h['REL_MODE'] and not mecode:
             x_pts = np.round(np.array([x_0, x_f]) + x_pos, 6)
             y_pts = np.round(np.array([y_0, y_f]) + y_pos, 6)
             z_pts = np.round(np.array([z_0, z_f]) + z_pos, 6)
@@ -169,14 +179,21 @@ def plot3d(history, outfile=None, **kwargs):
     else:
         fig.savefig(outfile, dpi=500)
 
-def animation(history, outfile=None, hide_travel=False,color_on=True, nozzle_cam=False,
-             fast_forward = 3, framerate = 60, nozzle_dims=[1.0,20.0], 
-             substrate_dims=[0.0,0.0,-1.0,300,1,300], scene_dims = [720,720], **kwargs):
+def animation(history: List[dict],
+              outfile:Optional[str] =None,
+              hide_travel=False,color_on=True,
+              nozzle_cam=False,
+              fast_forward = 3,
+              framerate = 60,
+              nozzle_dims=[1.0,20.0],
+              substrate_dims=[0.0,0.0,-1.0,300,1,300],
+              scene_dims = [720,720],
+              **kwargs):
         """ View the generated Gcode.
 
         Parameters
         ----------
-        history : list
+        history : List[dict]
             Contains a list of dict's where each dict hold every toolpath `move`
             printing move dict format (n.b. -- varies from mecode ):
                 {
