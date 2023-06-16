@@ -6,9 +6,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from gcode_helpers import get_accel_decel, get_print_mode, get_pressure_config, get_print_move, are_we_printing
 import numpy as np
-from typing import List, Optional
+from typing import List, Optional, Union, Tuple
+from mpl_toolkits.mplot3d.art3d import Line3DCollection
 
-def mecode_viewer(file_name: str, rel_mode: bool=False, animation: bool=False, verbose: bool=False, raw_gcode: List[str]=None, **kwargs) -> Optional[List[Dict]]:
+def mecode_viewer(file_name: str,
+                  rel_mode: bool=False,
+                  animation: bool=False,
+                  verbose: bool=False,
+                  raw_gcode: List[str]=None,
+                  origin: Union[List[Union[int, float]], Tuple[Union[int, float]]]=(0,0,0),
+                  **kwargs) -> Optional[List[Dict]]:
     '''Visualize gcode file
 
         Args:
@@ -17,6 +24,7 @@ def mecode_viewer(file_name: str, rel_mode: bool=False, animation: bool=False, v
             animation (bool): True for 3D animation, False for static matplotlib figure
             verbose (bool): If True, will return print history as a list of dict's
             raw_gcode (List[str]): Can provide list of gcode str commands in lieu of file_name
+            origin (Union[List[Union[int, float]], Tuple[Union[int, float]]]): Specify origin as initial starting point
 
         Returns:
             Optional[List[Dict]]: If verbose is true, will return print history
@@ -49,7 +57,7 @@ def mecode_viewer(file_name: str, rel_mode: bool=False, animation: bool=False, v
             'P' : PRESSURE,
             'P_COM_PORT': P_COM_PORT,
             'PRINTING': False,
-            'COORDS': (0,0,0.7),
+            'COORDS': origin,
             'PRINT_SPEED': 0
         }
     ]
@@ -109,6 +117,7 @@ def mecode_viewer(file_name: str, rel_mode: bool=False, animation: bool=False, v
     if verbose:
         return history
 
+
 def plot3d(history: List[dict], outfile:Optional[str] =None, mecode:Optional[bool] =False, **kwargs) -> None:
     '''Generates a 3D matplotlib figure.
 
@@ -122,41 +131,53 @@ def plot3d(history: List[dict], outfile:Optional[str] =None, mecode:Optional[boo
     fig = plt.figure(dpi=150)
     ax = plt.axes(projection='3d')
 
-    x_pos, y_pos, z_pos = history[0]['COORDS']
+    segs = []
 
-    for j, h in enumerate(history[1:]):
-        x_0, y_0, z_0 = history[j-1]['COORDS']
-        x_0 = 0 if x_0 is None else x_0
-        y_0 = 0 if y_0 is None else y_0
-        z_0 = 0 if z_0 is None else z_0
+    # origin
+    x_pts = [history[0]['COORDS'][0]] #[0]
+    y_pts = [history[0]['COORDS'][1]] #[0]
+    z_pts = [history[0]['COORDS'][2]] #[0]
 
-        x_f, y_f, z_f = h['COORDS']
-        x_f = 0 if x_f is None else x_f
-        y_f = 0 if y_f is None else y_f
-        z_f = 0 if z_f is None else z_f
-        
-        fmt = {
-            'ls': '-' if h['PRINTING'] else ':',
-            'c': (0,0,1,0.6) if h['PRINTING'] else 'k',
-            'lw': .5 if h['PRINTING'] else 1
-        }
-        if h['REL_MODE'] and not mecode:
-            x_pts = np.round(np.array([x_0, x_f]) + x_pos, 6)
-            y_pts = np.round(np.array([y_0, y_f]) + y_pos, 6)
-            z_pts = np.round(np.array([z_0, z_f]) + z_pos, 6)
+    # for u, v in zip(history[:-1], history[1:]):
+    for j, h in enumerate(history[1:], 1):
+        if h['REL_MODE']:
+            x_pts.append(x_pts[-1] + h['COORDS'][0])
+            y_pts.append(y_pts[-1] + h['COORDS'][1])
+            z_pts.append(z_pts[-1] + h['COORDS'][2])
 
-            x_pos, y_pos, z_pos = x_pos+x_f, y_pos+y_f, z_pos+z_f
+            segs.append([
+                (x_pts[-2], y_pts[-2], z_pts[-2]),
+                (x_pts[-1], y_pts[-1], z_pts[-1])
+            ])
+
         else:
-            x_pts = [x_0, x_f]
-            y_pts = [y_0, y_f]
-            z_pts = [z_0, z_f]
-        
-        # if h['PRINTING']:
-        ax.plot3D(x_pts, y_pts, z_pts, **fmt)
+            x_pts.append(h['COORDS'][0])
+            y_pts.append(h['COORDS'][1])
+            z_pts.append(h['COORDS'][2])
+
+            segs.append(
+                [
+                    (history[j-1]['COORDS'][0], history[j-1]['COORDS'][1], history[j-1]['COORDS'][2]),
+                    (h['COORDS'][0], h['COORDS'][1], h['COORDS'][2])
+                ]
+            )
+
+    linestyles = ['-' if h['PRINTING'] else ':' for h in history[1:]]
+    colors = [(0,0,1,0.6) if h['PRINTING'] else (0,0,0) for h in history[1:]]
+    linewidths = [0.5 if h['PRINTING'] else 1 for h in history[1:]]
+
+    line_segments = Line3DCollection(segs,
+                                     linewidths=linewidths,
+                                     colors=colors,
+                                     linestyles=linestyles
+                                     )
+    
+    ax.add_collection3d(line_segments)
 
     position_history = [d['COORDS'] for d in history]
 
-    X, Y, Z = np.vstack(position_history)[:,0], np.vstack(position_history)[:,1], np.vstack(position_history)[:,2]
+    # X, Y, Z = np.vstack(position_history)[:,0], np.vstack(position_history)[:,1], np.vstack(position_history)[:,2]
+    X, Y, Z = np.vstack([x_pts, y_pts, z_pts])
 
     # Hack to keep 3D plot's aspect ratio square. See SO answer:
     # http://stackoverflow.com/questions/13685386
@@ -178,6 +199,7 @@ def plot3d(history: List[dict], outfile:Optional[str] =None, mecode:Optional[boo
         plt.show()
     else:
         fig.savefig(outfile, dpi=500)
+
 
 def animation(history: List[dict],
               outfile:Optional[str] =None,
