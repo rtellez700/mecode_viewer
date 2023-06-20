@@ -11,7 +11,7 @@ from mpl_toolkits.mplot3d.art3d import Line3DCollection
 
 def mecode_viewer(file_name: str,
                   rel_mode: bool=False,
-                  animation: bool=False,
+                  animate: bool=False,
                   verbose: bool=False,
                   raw_gcode: List[str]=None,
                   origin: Union[List[Union[int, float]], Tuple[Union[int, float]]]=(0,0,0),
@@ -21,7 +21,7 @@ def mecode_viewer(file_name: str,
         Args:
             file_name (str): name of gcode file
             rel_mode (bool): True if relative coordinates, False if absolute coordinates
-            animation (bool): True for 3D animation, False for static matplotlib figure
+            animate (bool): True for 3D animation, False for static matplotlib figure
             verbose (bool): If True, will return print history as a list of dict's
             raw_gcode (List[str]): Can provide list of gcode str commands in lieu of file_name
             origin (Union[List[Union[int, float]], Tuple[Union[int, float]]]): Specify origin as initial starting point
@@ -34,7 +34,7 @@ def mecode_viewer(file_name: str,
 
             >>> mecode_viewer(file_name='gcode_file.pgm', rel_mode=True) # specify relative coordinates are being used
 
-            >>> mecode_viewer(file_name='gcode_file.pgm', animation=True) # show vpython 3D animation
+            >>> mecode_viewer(file_name='gcode_file.pgm', animate=True) # show vpython 3D animation
 
 
     '''
@@ -107,9 +107,9 @@ def mecode_viewer(file_name: str,
                     })
                     move_counter += 1
 
-    if not animation:
+    if not animate:
         plot3d(history, **kwargs)
-    elif animation:
+    elif animate:
         animation(history, **kwargs)
     else:
         raise ValueError("Invalid plotting backend! Choose one of mayavi or matplotlib or matplotlib2d or vpython.")

@@ -86,4 +86,5 @@ history = [
 # linestyles = ['-' if h['PRINTING'] else ':' for h in history]
 # print(linestyles)
 
-plot3d(history)
+# plot3d(history)
+animation(history)
