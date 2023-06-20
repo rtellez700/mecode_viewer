@@ -2,6 +2,6 @@
 
 __author__ = """Rodrigo Telles"""
 __email__ = 'rtelles@g.harvard.edu'
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 from .mecode_viewer import *
