@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 sys.path.append('../mecode_viewer')
-from  mecode_viewer import animation, plot3d
+from  mecode_viewer import animation, plot3d, plot2d
 
 history = [
     {
@@ -74,4 +74,5 @@ history = [
 # print(
 #     np.cumsum([[u['COORDS'][0], v['COORDS'][0]] for u,v in zip(history[:-1], history[1:])])
 # )
-plot3d(history)
+# plot3d(history)
+plot2d(history)

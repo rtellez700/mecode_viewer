@@ -8,6 +8,7 @@ from gcode_helpers import get_accel_decel, get_print_mode, get_pressure_config, 
 import numpy as np
 from typing import List, Optional, Union, Tuple
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
+from matplotlib.collections import LineCollection
 
 def mecode_viewer(file_name: str,
                   rel_mode: bool=False,
@@ -117,6 +118,87 @@ def mecode_viewer(file_name: str,
     if verbose:
         return history
 
+def plot2d(history: List[dict], outfile:Optional[str] =None, mecode:Optional[bool] =False, axes:Optional[str]='xy',  **kwargs) -> None:
+    '''Generates a 3D matplotlib figure.
+
+        Args:
+            - history (List[dict]): List of printing, speed, color, extrusion, etc... history
+            - outfile (str): If specified, will save 3D matplotlib figure locally at `outfile`
+            - mecode (bool): If False will not attempt to calculate absolute coordinates from relative points. Mecode by default does this conversion for us
+            - axes (str): 2D axes to plot
+
+    
+    '''
+    fig = plt.figure(dpi=150)
+    ax = plt.axes(projection=None)
+
+    segs = []
+
+    # origin
+    x_pts = [history[0]['COORDS'][0]] #[0]
+    y_pts = [history[0]['COORDS'][1]] #[0]
+    # z_pts = [history[0]['COORDS'][2]] #[0]
+
+    # for u, v in zip(history[:-1], history[1:]):
+    for j, h in enumerate(history[1:], 1):
+        if h['REL_MODE']:
+            x_pts.append(x_pts[-1] + h['COORDS'][0])
+            y_pts.append(y_pts[-1] + h['COORDS'][1])
+            # z_pts.append(z_pts[-1] + h['COORDS'][2])
+
+            segs.append([
+                (x_pts[-2], y_pts[-2]),
+                (x_pts[-1], y_pts[-1])
+            ])
+
+        else:
+            x_pts.append(h['COORDS'][0])
+            y_pts.append(h['COORDS'][1])
+            # z_pts.append(h['COORDS'][2])
+
+            segs.append(
+                [
+                    (history[j-1]['COORDS'][0], history[j-1]['COORDS'][1]),
+                    (h['COORDS'][0], h['COORDS'][1])
+                ]
+            )
+
+    linestyles = ['-' if h['PRINTING'] else ':' for h in history[1:]]
+    colors = [(0,0,1,0.6) if h['PRINTING'] else (0,0,0) for h in history[1:]]
+    linewidths = [0.5 if h['PRINTING'] else 1 for h in history[1:]]
+
+    line_segments = LineCollection(segs,
+                                     linewidths=linewidths,
+                                     colors=colors,
+                                     linestyles=linestyles
+                                     )
+    
+    ax.add_collection(line_segments)
+
+    position_history = [d['COORDS'] for d in history]
+
+    # X, Y, Z = np.vstack(position_history)[:,0], np.vstack(position_history)[:,1], np.vstack(position_history)[:,2]
+    X, Y = np.vstack([x_pts, y_pts])
+
+    # Hack to keep 3D plot's aspect ratio square. See SO answer:
+    # http://stackoverflow.com/questions/13685386
+    max_range = np.array([X.max()-X.min(),
+                            Y.max()-Y.min()]).max() / 2.0
+
+    mean_x = X.mean()
+    mean_y = Y.mean()
+    # mean_z = Z.mean()
+    ax.set_xlim(mean_x - max_range, mean_x + max_range)
+    ax.set_ylim(mean_y - max_range, mean_y + max_range)
+    # ax.set_zlim(mean_z - max_range, mean_z + max_range)
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    # ax.set_zlabel("Z")
+
+    if outfile == None:
+        plt.show()
+    else:
+        fig.savefig(outfile, dpi=500)
 
 def plot3d(history: List[dict], outfile:Optional[str] =None, mecode:Optional[bool] =False, **kwargs) -> None:
     '''Generates a 3D matplotlib figure.
