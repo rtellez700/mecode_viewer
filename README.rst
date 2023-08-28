@@ -39,12 +39,16 @@ Upgrading
    pip install git+https://github.com/rtellez700/mecode_viewer.git --upgrade
 
 Version Bump
----------
+------------
 
 .. code-block:: bash
 
    bump2version --current-version <version> patch|minor|major
    git push origin <tag name>
+   python setup.py sdist bdist_wheel
+   twine check dist/*
+   twine upload dist/* --verbose
+
 
 Example
 -------
