@@ -38,6 +38,14 @@ Upgrading
 
    pip install git+https://github.com/rtellez700/mecode_viewer.git --upgrade
 
+Version Bump
+---------
+
+.. code-block:: bash
+
+   bump2version --current-version <version> patch|minor|major
+   git push origin <tag name>
+
 Example
 -------
 
