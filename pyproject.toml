@@ -30,6 +30,7 @@ dependencies = [
     "matplotlib",
     "numpy",
     "vpython",
+    "mpl_toolkits"
 ]
 
 [project.scripts]
