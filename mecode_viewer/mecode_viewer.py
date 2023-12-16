@@ -1,4 +1,6 @@
-"""Main module."""
+"""
+#mecode_viewer() 
+"""
 from os.path import isfile
 from typing import Mapping, List, Optional, Dict
 from mpl_toolkits import mplot3d
@@ -18,7 +20,7 @@ def mecode_viewer(file_name: str,
                   origin: Union[List[Union[int, float]], Tuple[Union[int, float]]]=(0,0,0),
                   extrude_cmd: str=None,
                   **kwargs) -> Optional[List[Dict]]:
-    '''Visualize gcode file
+    '''mecode_viewer()
 
         Args:
             file_name (str): name of gcode file
@@ -27,9 +29,10 @@ def mecode_viewer(file_name: str,
             verbose (bool): If True, will return print history as a list of dict's
             raw_gcode (List[str]): Can provide list of gcode str commands in lieu of file_name
             origin (Union[List[Union[int, float]], Tuple[Union[int, float]]]): Specify origin as initial starting point
+            extrude_cmd (str): Command string that is used to start/stop extruding. E.g., Nordson pressure controller will typically use `Call togglePress`, whereas linear actuators use a command that contains `FREERUN PDISP5 ...`
 
         Returns:
-            Optional[List[Dict]]: If verbose is true, will return print history
+            Optional[List[Dict]]: If `verbose` is true, will return print history
 
         Examples:
             >>> mecode_viewer(file_name='gcode_file.pgm') # simplest case
@@ -37,6 +40,12 @@ def mecode_viewer(file_name: str,
             >>> mecode_viewer(file_name='gcode_file.pgm', rel_mode=True) # specify relative coordinates are being used
 
             >>> mecode_viewer(file_name='gcode_file.pgm', animate=True) # show vpython 3D animation
+
+            >>> mecode_viewer(file_name='gcode_file.pgm', extrude_cmd='FREERUN PDISP5') # using linear actuator command to specify extrusion
+
+            !!! note
+
+                If `extrude_cmd` is not provided, the default value will be to use the Nordson controller command (`Call togglePress`). If `extrude_cmd` is provided, `mecode_viewer` will search for `extrude_cmd` within gcode.  
 
 
     '''
