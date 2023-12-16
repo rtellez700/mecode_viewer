@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "mecode-viewer"
 dynamic = ["version"]
 description = "Simple GCode Viewer"
-readme = "README.rst"
+readme = "README.md"
 license = "MIT"
 requires-python = ">=3.6"
 authors = [
