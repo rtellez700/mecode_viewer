@@ -16,6 +16,7 @@ def mecode_viewer(file_name: str,
                   verbose: bool=False,
                   raw_gcode: List[str]=None,
                   origin: Union[List[Union[int, float]], Tuple[Union[int, float]]]=(0,0,0),
+                  extrude_cmd: str=None,
                   **kwargs) -> Optional[List[Dict]]:
     '''Visualize gcode file
 
@@ -89,7 +90,7 @@ def mecode_viewer(file_name: str,
             PRESSURE, P_COM_PORT = get_pressure_config(line, PRESSURE, P_COM_PORT)
 
             # are we printing?
-            PRINTING = are_we_printing(line, PRINTING)
+            PRINTING = are_we_printing(line, PRINTING, extrude_cmd)
 
             # GET PRINT SPEED
             if 'G1' in line:
