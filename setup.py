@@ -11,7 +11,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'numpy', 'matplotlib', 'gcode_helpers', 'vpython', 'mpl_toolkits'
+    'numpy', 'matplotlib', 'gcode_helpers', 'vpython'
 ]
 
 test_requirements = [ ]
