@@ -102,7 +102,7 @@ def mecode_viewer(file_name: str,
             PRINTING = are_we_printing(line, PRINTING, extrude_cmd)
 
             # GET PRINT SPEED
-            if 'G1' in line:
+            if 'G1' in line or 'G01' in line:
                 COORDS, PRINT_SPEED = get_print_move(line, history[move_counter-1])
 
                 if COORDS is not None:
