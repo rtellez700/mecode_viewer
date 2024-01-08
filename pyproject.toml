@@ -29,8 +29,7 @@ dependencies = [
     "gcode_helpers",
     "matplotlib",
     "numpy",
-    "vpython",
-    "mpl_toolkits"
+    "vpython"
 ]
 
 [project.scripts]
