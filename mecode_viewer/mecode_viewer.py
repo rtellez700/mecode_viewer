@@ -6,11 +6,23 @@ from typing import Mapping, List, Optional, Dict
 from mpl_toolkits import mplot3d
 import numpy as np
 import matplotlib.pyplot as plt
-from gcode_helpers import get_accel_decel, get_print_mode, get_pressure_config, get_print_move, are_we_printing
+from gcode_helpers import get_accel_decel, get_print_mode, get_pressure_config, get_print_move, are_we_printing, get_xyz
 import numpy as np
 from typing import List, Optional, Union, Tuple
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
 from matplotlib.collections import LineCollection
+
+def check_origin_change(line, origin):
+    if 'G92' in line:
+        X0, Y0, Z0 = get_xyz(line)
+    
+        X0 = X0 if X0 is not None else origin[0]
+        Y0 = Y0 if Y0 is not None else origin[1]
+        Z0 = Z0 if Z0 is not None else origin[2]
+    
+        return (X0, Y0, Z0)
+    else:
+        return origin
 
 def mecode_viewer(file_name: str,
                   rel_mode: bool=False,
@@ -59,6 +71,7 @@ def mecode_viewer(file_name: str,
     PRESSURE = 0
     PRINT_SPEED = 0
     PRINTING = False
+    ORIGIN = origin
 
     history = [
         {
@@ -69,6 +82,7 @@ def mecode_viewer(file_name: str,
             'P_COM_PORT': P_COM_PORT,
             'PRINTING': False,
             'COORDS': origin,
+            'ORIGIN': origin,
             'PRINT_SPEED': 0
         }
     ]
@@ -89,6 +103,10 @@ def mecode_viewer(file_name: str,
     for line in file_contents:
         if line.strip().startswith(';') != ';': 
             # print('counter -- ', move_counter)
+
+            # check if need to re-define origin
+            ORIGIN = check_origin_change(line, history[move_counter-1]['ORIGIN'])
+
             # identify if gcode is in relative mode
             REL_MODE = get_print_mode(line, REL_MODE)
 
@@ -114,6 +132,7 @@ def mecode_viewer(file_name: str,
                         'P_COM_PORT': P_COM_PORT,
                         'PRINTING': PRINTING,
                         'COORDS': COORDS,
+                        'ORIGIN': ORIGIN,
                         'PRINT_SPEED' : PRINT_SPEED
                     })
                     move_counter += 1
