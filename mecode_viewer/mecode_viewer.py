@@ -12,17 +12,62 @@ from typing import List, Optional, Union, Tuple
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
 from matplotlib.collections import LineCollection
 
-def check_origin_change(line, origin):
+def check_origin_change(line, origin, current_position):
     if 'G92' in line:
         X0, Y0, Z0 = get_xyz(line)
     
-        X0 = X0 if X0 is not None else origin[0]
-        Y0 = Y0 if Y0 is not None else origin[1]
-        Z0 = Z0 if Z0 is not None else origin[2]
+        X0 = current_position['X'] if X0 is not None else origin[0]
+        Y0 = current_position['Y'] if Y0 is not None else origin[1]
+        Z0 = current_position['Z'] if Z0 is not None else origin[2]
+
+        print(line)
+        print('origin change', origin, ' --> ', X0, Y0, Z0)
     
         return (X0, Y0, Z0)
     else:
         return origin
+
+def update_current_position(coordinates, prev_position, rel_mode):
+    # if mode == 'auto':
+    #     mode = 'relative' if self.is_relative else 'absolute'
+
+    # if self.x_axis != 'X' and x is not None:
+    #     kwargs[self.x_axis] = x
+    # if self.y_axis != 'Y' and y is not None:
+    #     kwargs[self.y_axis] = y
+    # if self.z_axis != 'Z' and z is not None:
+    #     kwargs[self.z_axis] = z
+    current_position = {}
+    # x0, y0, z0 = origin
+    x, y, z = coordinates
+    print('update coords: ', coordinates)
+
+    if rel_mode:
+        if x is not None:
+            current_position['X'] = prev_position['X'] + x
+        if y is not None:
+            current_position['Y'] = prev_position['Y'] + y
+        if z is not None:
+            current_position['Z'] = prev_position['Z'] + z
+        # for dimention, delta in kwargs.items():
+        #     current_position[dimention] += delta
+    else:
+        if x is not None:
+            current_position['X'] = x
+        if y is not None:
+            current_position['Y'] = y
+        if z is not None:
+            current_position['Z'] = z
+        # for dimention, delta in kwargs.items():
+        #     current_position[dimention] = delta
+
+    # x = current_position['x']
+    # y = current_position['y']
+    # z = current_position['z']
+
+    # current_position.append((x, y, z))
+            
+    return current_position
 
 def mecode_viewer(file_name: str,
                   rel_mode: bool=False,
@@ -31,7 +76,8 @@ def mecode_viewer(file_name: str,
                   raw_gcode: List[str]=None,
                   origin: Union[List[Union[int, float]], Tuple[Union[int, float]]]=(0,0,0),
                   extrude_cmd: str=None,
-                  **kwargs) -> Optional[List[Dict]]:
+                  **kwargs
+                  ) -> Optional[List[Dict]]:
     '''mecode_viewer()
 
         Args:
@@ -81,9 +127,10 @@ def mecode_viewer(file_name: str,
             'P' : PRESSURE,
             'P_COM_PORT': P_COM_PORT,
             'PRINTING': False,
+            'PRINT_SPEED': 0,
             'COORDS': origin,
             'ORIGIN': origin,
-            'PRINT_SPEED': 0
+            'CURRENT_POSITION': {'X': origin[0], 'Y': origin[1], 'Z': origin[2]}
         }
     ]
 
@@ -105,7 +152,7 @@ def mecode_viewer(file_name: str,
             # print('counter -- ', move_counter)
 
             # check if need to re-define origin
-            ORIGIN = check_origin_change(line, history[move_counter-1]['ORIGIN'])
+            ORIGIN = check_origin_change(line, history[move_counter-1]['ORIGIN'], history[move_counter-1]['CURRENT_POSITION'])
 
             # identify if gcode is in relative mode
             REL_MODE = get_print_mode(line, REL_MODE)
@@ -131,9 +178,10 @@ def mecode_viewer(file_name: str,
                         'P' : PRESSURE,
                         'P_COM_PORT': P_COM_PORT,
                         'PRINTING': PRINTING,
+                        'PRINT_SPEED' : PRINT_SPEED,
                         'COORDS': COORDS,
                         'ORIGIN': ORIGIN,
-                        'PRINT_SPEED' : PRINT_SPEED
+                        'CURRENT_POSITION': update_current_position(COORDS, history[move_counter-1]['CURRENT_POSITION'], REL_MODE,)
                     })
                     move_counter += 1
 
