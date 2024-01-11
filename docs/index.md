@@ -39,6 +39,19 @@ from  mecode_viewer import mecode_viewer
 mecode_viewer(file_name='gcode_file.pgm', animate=True)
 ```
 
+### Example: mixing, multimaterial printing
+If `extrude_cmd` is provided with a list or tuple with more than one entry, `mecode_viewer` will generate a figure color coded for each extrusion source.
+```python
+from mecode_viewer import mecode_viewer
+mecode_viewer('./gcode_examples/LineTest_Div_3LinDist182_short.PGM',
+              extrude_cmd=('PDISP1', 'PDISP2'),
+              extrude_stop_cmd=('PDISP1 STOP', 'PDISP2 STOP'))
+```
+
+!!! warning
+
+    This currently only work for two extrusion sources. We plan to add support for more extruders / more colors.
+
 ## Want to learn more?
 
 Full documenation of [`mecode_viewer`](#) available at [API Reference](api.md).
