@@ -1,4 +1,4 @@
-gcode_helpers >= 0.2.0
+gcode_helpers >= 0.3.0
 matplotlib
 numpy
 vpython

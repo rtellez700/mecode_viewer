@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 sys.path.append('../mecode_viewer')
-from  mecode_viewer import animation, plot3d, mecode_viewer
+from  mecode_viewer import animation, plot3d, mecode_viewer, plot2d
 
 # mecode_viewer('./gcode_examples/LineTest_Div_3LinDist182.PGM')
 # history = mecode_viewer('./gcode_examples/LineTest_Div_3LinDist182.PGM',
@@ -17,15 +17,17 @@ history = mecode_viewer('./gcode_examples/LineTest_Div_3LinDist182_short.PGM',
               verbose=True, hide_plots=True)
 
 # fig = plt.figure(dpi=150)
-ax = plt.axes(projection='3d')
-ax = plot3d(history, ax=ax)
+# ax = plt.axes(projection='3d')
+# ax = plot3d(history, ax=ax, cross_section='xz')
+# ax.set_zlim(zmin=0)
+# plt.show()
 
-ax.set_zlim(zmin=0)
-
-plt.show()
+'''2d example'''
+plot2d(history)
 # print(history)
 
-animation(history, fast_forward=1)
+'''animation example'''
+# animation(history, fast_forward=1)
 
 # mecode_viewer('./gcode_examples/LineTest_Div_3LinDist182_noVars.PGM',
 #               extrude_cmd=('PDISP1', 'PDISP2'),

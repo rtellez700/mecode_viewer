@@ -22,8 +22,8 @@ def mecode_viewer(file_name: str,
                   raw_gcode: List[str]=None,
                   hide_plots: bool=False,
                   origin: Union[List[Union[int, float]], Tuple[Union[int, float]]]=(0,0,0),
-                  extrude_cmd:  Union[List[str], Tuple[str]]=None,
-                  extrude_stop_cmd: Union[List[str], Tuple[str]]=None,
+                  extrude_cmd:  Union[str, List[str], Tuple[str]]=None,
+                  extrude_stop_cmd: Union[str, List[str], Tuple[str]]=None,
                   **kwargs
                   ) -> Optional[List[Dict]]:
     '''mecode_viewer()
@@ -35,7 +35,8 @@ def mecode_viewer(file_name: str,
             verbose (bool): If True, will return print history as a list of dict's
             raw_gcode (List[str]): Can provide list of gcode str commands in lieu of file_name
             origin (Union[List[Union[int, float]], Tuple[Union[int, float]]]): Specify origin as initial starting point
-            extrude_cmd (str): Command string that is used to start/stop extruding. E.g., Nordson pressure controller will typically use `Call togglePress`, whereas linear actuators use a command that contains `FREERUN PDISP5 ...`
+            extrude_cmd (str or List[str] or Tuple[str]): Command string that is used to start extruding.E.g., Nordson pressure controller will typically use `Call togglePress`, whereas linear actuators use a command that contains `FREERUN PDISP5 ...`
+            extrude_cmd (str or List[str] or Tuple[str]): Command string that is used to stop extruding.
 
         Returns:
             Optional[List[Dict]]: If `verbose` is true, will return print history
@@ -64,28 +65,19 @@ def mecode_viewer(file_name: str,
     P_COM_PORT = 5
     PRESSURE = 0
     PRINT_SPEED = 0
-    PRINTING= False if isinstance(extrude_cmd, str) else {k.strip() : {'printing': False, 'value': 0} for k in extrude_cmd}
+    PRINTING = False
+    if extrude_cmd is None:
+        PRINTING = False
+    elif isinstance(extrude_cmd, str):
+        PRINTING = {extrude_cmd.strip(): {'printing': False, 'value': 0}}
+    elif any([isinstance(extrude_cmd, list), isinstance(extrude_cmd, tuple)]):
+        PRINTING = {k.strip() : {'printing': False, 'value': 0} for k in extrude_cmd}
+    else:
+        raise ValueError('Unsupported `extrude_cmd` provided. ', extrude_cmd)
+
     ORIGIN = origin
     VARIABLES = {}
-
-    '''
-        state: (('PDISP1', True, value), ('PDISP2', False, value))
-    '''
-    # history = (
-    #     {
-    #         'REL_MODE': REL_MODE,
-    #         'ACCEL' : ACCEL_RATE,
-    #         'DECEL' : DECEL_RATE,
-    #         'P' : PRESSURE,
-    #         'P_COM_PORT': P_COM_PORT,
-    #         'PRINTING': PRINTING,
-    #         'PRINT_SPEED': 0,
-    #         'COORDS': origin,
-    #         'ORIGIN': origin,
-    #         'CURRENT_POSITION': {'X': origin[0], 'Y': origin[1], 'Z': origin[2]},
-    #         'VARIABLES': VARIABLES
-    #     },
-    # )
+    
     history = [{
             'REL_MODE': REL_MODE,
             'ACCEL' : ACCEL_RATE,
@@ -99,6 +91,7 @@ def mecode_viewer(file_name: str,
             'CURRENT_POSITION': {'X': origin[0], 'Y': origin[1], 'Z': origin[2]},
             'VARIABLES': VARIABLES
         }]
+    
 
     move_counter = 1
 
@@ -113,9 +106,8 @@ def mecode_viewer(file_name: str,
     else:
         print('file_name is neither a file nor a string...')
 
-    for line in file_contents:
+    for j, line in enumerate(file_contents):
         if line.strip().startswith(';') != ';': 
-
             # check if need to re-define origin
             ORIGIN = _check_origin_change(line, ORIGIN, history[move_counter-1]['COORDS'])
 
@@ -168,54 +160,67 @@ def mecode_viewer(file_name: str,
     if verbose:
         return history
 
-def plot2d(history: List[dict], outfile:Optional[str] =None, mecode:Optional[bool] =False, axes:Optional[str]='xy',  **kwargs) -> None:
+def plot2d(history: List[dict],
+        outfile:Optional[str] =None,
+        mecode:Optional[bool] =False,
+        ax:Optional[plt.axes] =None,
+        cross_section:Optional[str] ='xy',
+         **kwargs) -> None:
     '''Generates a 3D matplotlib figure.
 
         Args:
             - history (List[dict]): List of printing, speed, color, extrusion, etc... history
             - outfile (str): If specified, will save 3D matplotlib figure locally at `outfile`
             - mecode (bool): If False will not attempt to calculate absolute coordinates from relative points. Mecode by default does this conversion for us
-            - axes (str): 2D axes to plot
+            - ax (plt.axes): Matplotlib axes reference
+            - cross_section: (str): To display only the `xy`-, `yz`-, or `xz`-planes
 
     
     '''
-    fig = plt.figure(dpi=150)
-    ax = plt.axes(projection=None)
+    manual_plot = True
+    if ax is None:
+        fig = plt.figure(dpi=150)
+        ax = plt.axes(projection=None)
+        manual_plot = False
 
     segs = []
 
     # origin
-    x_pts = [history[0]['COORDS'][0]] #[0]
-    y_pts = [history[0]['COORDS'][1]] #[0]
-    # z_pts = [history[0]['COORDS'][2]] #[0]
+    x_pts = [h['CURRENT_POSITION']['X'] for h in history] #[0]
+    y_pts = [h['CURRENT_POSITION']['Y'] for h in history] #[0]
+    z_pts = [h['CURRENT_POSITION']['Z'] for h in history] #[0]
 
-    # for u, v in zip(history[:-1], history[1:]):
     for j, h in enumerate(history[1:], 1):
-        if h['REL_MODE']:
-            x_pts.append(x_pts[-1] + h['COORDS'][0])
-            y_pts.append(y_pts[-1] + h['COORDS'][1])
-            # z_pts.append(z_pts[-1] + h['COORDS'][2])
-
-            segs.append([
-                (x_pts[-2], y_pts[-2]),
-                (x_pts[-1], y_pts[-1])
-            ])
-
-        else:
-            x_pts.append(h['COORDS'][0])
-            y_pts.append(h['COORDS'][1])
-            # z_pts.append(h['COORDS'][2])
-
+        if cross_section == 'xy':
             segs.append(
-                [
-                    (history[j-1]['COORDS'][0], history[j-1]['COORDS'][1]),
-                    (h['COORDS'][0], h['COORDS'][1])
-                ]
-            )
+                    [
+                        (history[j-1]['CURRENT_POSITION']['X'], history[j-1]['CURRENT_POSITION']['Y']),
+                        (h['CURRENT_POSITION']['X'], h['CURRENT_POSITION']['Y'])
+                    ]
+                )
+        elif cross_section == 'yz':
+            segs.append(
+                    [
+                        (history[j-1]['CURRENT_POSITION']['Y'], history[j-1]['CURRENT_POSITION']['Z']),
+                        (h['CURRENT_POSITION']['Y'], h['CURRENT_POSITION']['Z'])
+                    ]
+                )
+        elif cross_section == 'xz':
+            segs.append(
+                    [
+                        (history[j-1]['CURRENT_POSITION']['X'], history[j-1]['CURRENT_POSITION']['Z']),
+                        (h['CURRENT_POSITION']['X'], h['CURRENT_POSITION']['Z'])
+                    ]
+                )
+        else:
+            raise ValueError('The following cross_section is not supported. Only xy, yz, or xz are supported', cross_section)
+        
 
-    linestyles = ['-' if h['PRINTING'] else ':' for h in history[1:]]
-    colors = [(0,0,1,0.6) if h['PRINTING'] else (0,0,0) for h in history[1:]]
-    linewidths = [0.5 if h['PRINTING'] else 1 for h in history[1:]]
+    # linestyles = ['-' if h['PRINTING'] else ':' for h in history[1:]]
+    # colors = [(0,0,1,0.6) if h['PRINTING'] else (0,0,0) for h in history[1:]]
+    # linewidths = [0.5 if h['PRINTING'] else 1 for h in history[1:]]
+
+    linestyles, colors, linewidths = _get_3d_styles(history[1:])
 
     line_segments = LineCollection(segs,
                                      linewidths=linewidths,
@@ -241,91 +246,57 @@ def plot2d(history: List[dict], outfile:Optional[str] =None, mecode:Optional[boo
     ax.set_xlim(mean_x - max_range, mean_x + max_range)
     ax.set_ylim(mean_y - max_range, mean_y + max_range)
     # ax.set_zlim(mean_z - max_range, mean_z + max_range)
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
+    if cross_section == 'xy':
+        ax.set_xlabel("X")
+        ax.set_ylabel("Y")
+    elif cross_section == 'yz':
+        ax.set_xlabel("Y")
+        ax.set_ylabel("Z")
+    elif cross_section == 'xz':
+        ax.set_xlabel("X")
+        ax.set_ylabel("Z")
     # ax.set_zlabel("Z")
 
-    if outfile is None:
-        plt.show()
+    if manual_plot is False:
+        if outfile is None:
+            plt.show()
+        else:
+            fig.savefig(outfile, dpi=500)
     else:
-        fig.savefig(outfile, dpi=500)
-
-def get_3d_styles(history):
-    def create_linear_gradient_colormap(color1, color2, num_colors=256):
-        colors = [color1, color2]
-        gradient_cmap = LinearSegmentedColormap.from_list('custom_gradient', colors, N=num_colors)
-
-        return gradient_cmap
-    
-    # check if printing is a string or a dict w/ one key --> if so single material
-    if isinstance(history[0]['PRINTING'], str) or isinstance(history[0]['PRINTING'], bool):
-        linestyles = ['-' if h['PRINTING'] else ':' for h in history[1:]]
-        colors = [(0,0,1,0.6) if h['PRINTING'] else (0,0,0) for h in history[1:]]
-        linewidths = [0.5 if h['PRINTING'] else 1 for h in history[1:]]
-    elif isinstance(len(history[0]['PRINTING']), dict) and len(history[0]['PRINTING'])==1:
-        linestyles = ['-' if h['PRINTING']['printing'] and h['PRINTING']['value']!=0 else ':' for h in history[1:]]
-        colors = [(0,0,1,0.6) if h['PRINTING']['printing'] and h['PRINTING']['value']!=0 else (0,0,0) for h in history[1:]]
-        linewidths = [0.5 if h['PRINTING']['printing'] and h['PRINTING']['value']!=0 else 1 for h in history[1:]]
-    # else assume multimaterial
-    else:
-        linestyles = []
-        colors = []
-        linewidths = []
-        for h in history:
-            # all extruders are off
-            all_off = all(entry['value'] == 0 for entry in h['PRINTING'].values())
-            if all_off:
-                linestyles.append(':')
-                colors.append((0,0,0))
-                linewidths.append(1)
-
-            else:
-                linestyles.append('-')
-                linewidths.append(0.5)
-
-                # NOTE: right now assuming only two extruders will be active at a time
-                keys = sorted(h['PRINTING'].keys())
-                ratio = h['PRINTING'][keys[0]]['value'] / (h['PRINTING'][keys[0]]['value'] + h['PRINTING'][keys[1]]['value'])
-                red_color = (1,0,0)
-                blue_color = (0,0,1)
-                gradient_cmap = create_linear_gradient_colormap(red_color, blue_color)
-                colors.append(gradient_cmap(ratio * 256)) # number b/w 0 and 256
-                # keys_greater_than_zero = [key for key, entry in h['PRINTING'].items() if entry['value'] > 0]
+        return ax
 
 
-
-        
-
-
-    return linestyles, colors, linewidths
-
-def plot3d(history: List[dict], outfile:Optional[str] =None, mecode:Optional[bool] =False, ax:Optional[plt.axes] =None, **kwargs) -> None:
+def plot3d(history: List[dict],
+        outfile:Optional[str] =None,
+        mecode:Optional[bool] =False,
+        ax:Optional[plt.axes] =None,
+        cross_section:Optional[str] =None,
+        **kwargs) -> None:
     '''Generates a 3D matplotlib figure.
 
         Args:
             - history (List[dict]): List of printing, speed, color, extrusion, etc... history
             - outfile (str): If specified, will save 3D matplotlib figure locally at `outfile`
             - mecode (bool): If False will not attempt to calculate absolute coordinates from relative points. Mecode by default does this conversion for us
+            - ax (plt.axes): Matplotlib axes reference
+            - cross_section: (str): To display only the `xy`-, `yz`-, or `xz`-planes
 
     
     '''
+    manual_plot = True
     if ax is None:
         fig = plt.figure(dpi=150)
         ax = plt.axes(projection='3d')
+        manual_plot = False
 
     segs = []
 
     # origin
-    # x_pts = [history[0]['COORDS'][0]] #[0]
-    # y_pts = [history[0]['COORDS'][1]] #[0]
-    # z_pts = [history[0]['COORDS'][2]] #[0]
     x_pts = [h['CURRENT_POSITION']['X'] for h in history] #[0]
     y_pts = [h['CURRENT_POSITION']['Y'] for h in history] #[0]
     z_pts = [h['CURRENT_POSITION']['Z'] for h in history] #[0]
 
-    # for u, v in zip(history[:-1], history[1:]):
     for j, h in enumerate(history[1:], 1):
-
         segs.append(
                 [
                     (history[j-1]['CURRENT_POSITION']['X'], history[j-1]['CURRENT_POSITION']['Y'], history[j-1]['CURRENT_POSITION']['Z']),
@@ -333,33 +304,7 @@ def plot3d(history: List[dict], outfile:Optional[str] =None, mecode:Optional[boo
                 ]
             )
 
-
-        # if h['REL_MODE']:
-        #     x_pts.append(x_pts[-1] + h['COORDS'][0])
-        #     y_pts.append(y_pts[-1] + h['COORDS'][1])
-        #     z_pts.append(z_pts[-1] + h['COORDS'][2])
-
-        #     segs.append([
-        #         (x_pts[-2], y_pts[-2], z_pts[-2]),
-        #         (x_pts[-1], y_pts[-1], z_pts[-1])
-        #     ])
-
-        # else:
-        #     x_pts.append(h['COORDS'][0] - h['ORIGIN'][0])
-        #     y_pts.append(h['COORDS'][1] - h['ORIGIN'][1])
-        #     z_pts.append(h['COORDS'][2] - h['ORIGIN'][2])
-
-            # segs.append(
-            #     [
-            #         (history[j-1]['COORDS'][0], history[j-1]['COORDS'][1], history[j-1]['COORDS'][2]),
-            #         (h['COORDS'][0], h['COORDS'][1], h['COORDS'][2])
-            #     ]
-            # )
-
-    linestyles, colors, linewidths = get_3d_styles(history[1:])
-    # linestyles = ['-' if h['PRINTING'] else ':' for h in history[1:]]
-    # colors = [(0,0,1,0.6) if h['PRINTING'] else (0,0,0) for h in history[1:]]
-    # linewidths = [0.5 if h['PRINTING'] else 1 for h in history[1:]]
+    linestyles, colors, linewidths = _get_3d_styles(history[1:])
 
     line_segments = Line3DCollection(segs,
                                      linewidths=linewidths,
@@ -378,7 +323,7 @@ def plot3d(history: List[dict], outfile:Optional[str] =None, mecode:Optional[boo
     # http://stackoverflow.com/questions/13685386
     max_range = np.array([X.max()-X.min(),
                             Y.max()-Y.min(),
-                            Z.max()-Z.min()]).max() / 2
+                            Z.max()-Z.min()]).max() / 2.0
 
     mean_x = X.mean()
     mean_y = Y.mean()
@@ -390,7 +335,29 @@ def plot3d(history: List[dict], outfile:Optional[str] =None, mecode:Optional[boo
     ax.set_ylabel("Y")
     ax.set_zlabel("Z")
 
-    if ax is None:
+    if cross_section == 'xy':
+        ax.view_init(elev=90, azim=0)
+        ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        ax.set_zlabel('')
+        ax.set_zticks([])
+    elif cross_section == 'yz':
+        ax.view_init(elev=0, azim=0)
+        ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        ax.set_xlabel('')
+        ax.set_xticks([])
+    elif cross_section == 'xz':
+        ax.view_init(elev=0, azim=-90)
+        ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+        ax.set_ylabel('')
+        ax.set_yticks([])
+
+    if manual_plot is False:
         if outfile is None:
             plt.show()
         else:
@@ -410,6 +377,7 @@ def animation(history: List[dict],
               scene_center = [0,0,0],
               scence_forward = [-1,-1,-1],
               scence_background = [1,1,1],
+              cross_section = None,
               **kwargs):
         """ View the generated Gcode.
 
@@ -470,12 +438,16 @@ def animation(history: List[dict],
 
         """
         position_history = [(d['CURRENT_POSITION']['X'], d['CURRENT_POSITION']['Y'], d['CURRENT_POSITION']['Z']) for d in history]
-        extruding_history = [any(entry['value'] > 0 for entry in d['PRINTING'].values()) for d in history]
+        
+        extruding_history = []
+        for d in history:
+            if any([isinstance(d['PRINTING'], list), isinstance(d['PRINTING'], tuple)]):
+                extruding_history.append(any(entry['value'] > 0 for entry in d['PRINTING'].values()))
+            else:
+                extruding_history.append(d['PRINTING'])
         speed_history = [d['PRINT_SPEED'] for d in history]
         speed_history = [np.mean(speed_history) if v==0 else v for v in speed_history]
-        _, color_history, _ = get_3d_styles(history)
-
-        print(speed_history)
+        _, color_history, _ = _get_3d_styles(history)
         
         import vpython as vp
         
@@ -707,6 +679,43 @@ def _update_current_position(coordinates, prev_position, rel_mode):
 
     return {key: round(value, 6) for key, value in current_position.items()}
 
+def _get_3d_styles(history):
+    def create_linear_gradient_colormap(color1, color2, num_colors=256):
+        colors = [color1, color2]
+        gradient_cmap = LinearSegmentedColormap.from_list('custom_gradient', colors, N=num_colors)
+
+        return gradient_cmap
+
+    linestyles = []
+    colors = []
+    linewidths = []
+    for h in history:
+        # all extruders are off
+        all_off = all(entry['value'] == 0 for entry in h['PRINTING'].values())
+        if all_off:
+            linestyles.append(':')
+            colors.append((0,0,0))
+            linewidths.append(1)
+
+        else:
+            linestyles.append('-')
+            linewidths.append(0.5)
+
+            # NOTE: right now assuming only two extruders will be active at a time
+            keys = sorted(h['PRINTING'].keys())
+            if len(keys) == 1:
+                colors.append((1,0,0)) # number b/w 0 and 256
+            elif len(keys) == 2:
+                ratio = h['PRINTING'][keys[0]]['value'] / (h['PRINTING'][keys[0]]['value'] + h['PRINTING'][keys[1]]['value'])
+                red_color = (1,0,0)
+                blue_color = (0,0,1)
+                gradient_cmap = create_linear_gradient_colormap(red_color, blue_color)
+                colors.append(gradient_cmap(ratio * 256)) # number b/w 0 and 256
+            # keys_greater_than_zero = [key for key, entry in h['PRINTING'].items() if entry['value'] > 0]
+            elif len(keys) > 2:
+                raise ValueError('only two colors / extruders are currently supported')
+
+    return linestyles, colors, linewidths
 
 
 
@@ -727,8 +736,7 @@ def _update_current_position(coordinates, prev_position, rel_mode):
 #               mode='abs', backend='vpython', nozzle_dims=[0.5,10])
 
 '''static example'''
-# mecode_viewer(file_name='../jlab_tests/gcode_examples/re-entrant__3x3_30mmx30mm_25layers__0.5dN_0.4dz_1passes_-2taper.pgm',
-#               mode='abs', backend='matplotlib', nozzle_dims=[0.5,10])
+# mecode_viewer(file_name='jlab_tests/gcode_examples/re-entrant__3x3_30mmx30mm_25layers__0.5dN_0.4dz_1passes_-2taper.pgm',)
 
 '''animation'''
 # mecode_viewer(file_name='../jlab_tests/gcode_examples/re-entrant__3x3_30mmx30mm_25layers__0.5dN_0.4dz_1passes_-2taper.pgm',
