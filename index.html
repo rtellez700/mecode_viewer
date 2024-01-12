@@ -770,6 +770,10 @@
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">mecode_viewer</span><span class="p">(</span><span class="n">file_name</span><span class="o">=</span><span class="s1">&#39;gcode_file.pgm&#39;</span><span class="p">,</span> <span class="n">extrude_cmd</span><span class="o">=</span><span class="s1">&#39;FREERUN PDISP5&#39;</span><span class="p">)</span>
 </span></code></pre></div></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If more than one extrusion source is present in the gcode this approach will not work. In this case a list of <code>extrude_cmd</code>'s and <code>extrude_stop_cmd</code>'s should be used. See e.g., <a href="#example-mixing-multimaterial-printing">multimaterial example below</a></p>
+</div>
 <h3 id="example-animated-visualization">Example: animated visualization</h3>
 <p>By default <code>mecode_viewer</code> will display a 3D figure of your gcode toolpath. If you would like to view an animated version, set <code>animate=True</code>.
 <div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span>  <span class="nn">mecode_viewer</span> <span class="kn">import</span> <span class="n">mecode_viewer</span>
