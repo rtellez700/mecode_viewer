@@ -31,6 +31,10 @@ from  mecode_viewer import mecode_viewer
 mecode_viewer(file_name='gcode_file.pgm', extrude_cmd='FREERUN PDISP5')
 ```
 
+!!! note
+
+    If more than one extrusion source is present in the gcode this approach will not work. In this case a list of `extrude_cmd`'s and `extrude_stop_cmd`'s should be used. See e.g., [multimaterial example below](#example-mixing-multimaterial-printing)
+
 ### Example: animated visualization
 By default `mecode_viewer` will display a 3D figure of your gcode toolpath. If you would like to view an animated version, set `animate=True`.
 ```python
