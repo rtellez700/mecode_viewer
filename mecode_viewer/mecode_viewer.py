@@ -647,7 +647,6 @@ def animation(history: List[dict],
 
         while True:
             if running:
-                print(f'frame #{frame} w/ color=', color_history[frame])
                 head.abs_move(endpoint=vp.vec(*position_history[frame]),
                                 feed=speed_history[frame],
                                 print_line=extruding_history[frame],
@@ -696,7 +695,6 @@ def _update_current_position(coordinates, prev_position, rel_mode):
 
 def _get_3d_styles(history, colors, **kwargs):
     def create_linear_gradient_colormap(color1, color2, num_colors=256 if 'num_colors' not in kwargs.keys() else kwargs['num_colors']):
-        print('numbcolors', num_colors)
         colors = [color1, color2]
         gradient_cmap = LinearSegmentedColormap.from_list('custom_gradient', colors, N=num_colors)
 
@@ -714,7 +712,6 @@ def _get_3d_styles(history, colors, **kwargs):
             all_off = all(entry['value'] == 0 for entry in h['PRINTING'].values())
         
         if all_off:
-            print('hhhhhhh', h)
             linestyles.append(':')
             color_history.append((0,0,0)) if h['COLOR'] is None else color_history.append(h['COLOR'])
             linewidths.append(1)
