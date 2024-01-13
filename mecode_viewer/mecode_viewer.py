@@ -89,7 +89,8 @@ def mecode_viewer(file_name: str,
             'COORDS': origin,
             'ORIGIN': origin,
             'CURRENT_POSITION': {'X': origin[0], 'Y': origin[1], 'Z': origin[2]},
-            'VARIABLES': VARIABLES
+            'VARIABLES': VARIABLES,
+            'COLOR': kwargs['color'] if 'color' in kwargs else None
         }]
     
 
@@ -165,6 +166,7 @@ def plot2d(history: List[dict],
         mecode:Optional[bool] =False,
         ax:Optional[plt.axes] =None,
         cross_section:Optional[str] ='xy',
+        colors:Optional[Union[str, List[str], Tuple[str]]] = None,
          **kwargs) -> None:
     '''Generates a 3D matplotlib figure.
 
@@ -174,6 +176,9 @@ def plot2d(history: List[dict],
             - mecode (bool): If False will not attempt to calculate absolute coordinates from relative points. Mecode by default does this conversion for us
             - ax (plt.axes): Matplotlib axes reference
             - cross_section: (str): To display only the `xy`-, `yz`-, or `xz`-planes
+            - colors (str, List[str], Tuple[str]): used to specify displayed filament color or override previously set color.
+                            For multimaterial printing can provide a list of tuple of colors for each filament or if mixing a
+                            gradient will be automatically created.
 
     
     '''
@@ -214,13 +219,8 @@ def plot2d(history: List[dict],
                 )
         else:
             raise ValueError('The following cross_section is not supported. Only xy, yz, or xz are supported', cross_section)
-        
 
-    # linestyles = ['-' if h['PRINTING'] else ':' for h in history[1:]]
-    # colors = [(0,0,1,0.6) if h['PRINTING'] else (0,0,0) for h in history[1:]]
-    # linewidths = [0.5 if h['PRINTING'] else 1 for h in history[1:]]
-
-    linestyles, colors, linewidths = _get_3d_styles(history[1:])
+    linestyles, colors, linewidths = _get_3d_styles(history[1:], colors=colors, **kwargs)
 
     line_segments = LineCollection(segs,
                                      linewidths=linewidths,
@@ -271,15 +271,20 @@ def plot3d(history: List[dict],
         mecode:Optional[bool] =False,
         ax:Optional[plt.axes] =None,
         cross_section:Optional[str] =None,
+        colors:Optional[Union[str, List[str], Tuple[str]]] = None,
         **kwargs) -> None:
     '''Generates a 3D matplotlib figure.
 
         Args:
             - history (List[dict]): List of printing, speed, color, extrusion, etc... history
             - outfile (str): If specified, will save 3D matplotlib figure locally at `outfile`
-            - mecode (bool): If False will not attempt to calculate absolute coordinates from relative points. Mecode by default does this conversion for us
+            - mecode (bool): If False will not attempt to calculate absolute coordinates from relative points.
+                            Mecode by default does this conversion for us
             - ax (plt.axes): Matplotlib axes reference
-            - cross_section: (str): To display only the `xy`-, `yz`-, or `xz`-planes
+            - cross_section (str): To display only the `xy`-, `yz`-, or `xz`-planes
+            - colors (str, List[str], Tuple[str]): used to specify displayed filament color or override previously set color.
+                            For multimaterial printing can provide a list of tuple of colors for each filament or if mixing a
+                            gradient will be automatically created.
 
     
     '''
@@ -304,7 +309,7 @@ def plot3d(history: List[dict],
                 ]
             )
 
-    linestyles, colors, linewidths = _get_3d_styles(history[1:])
+    linestyles, colors, linewidths = _get_3d_styles(history[1:], colors=colors, **kwargs)
 
     line_segments = Line3DCollection(segs,
                                      linewidths=linewidths,
@@ -377,7 +382,7 @@ def animation(history: List[dict],
               scene_center = [0,0,0],
               scence_forward = [-1,-1,-1],
               scence_background = [1,1,1],
-              cross_section = None,
+              colors:Optional[Union[str, List[str], Tuple[str]]] = None,
               **kwargs):
         """ View the generated Gcode.
 
@@ -435,21 +440,30 @@ def animation(history: List[dict],
         scene_center: list (default: [0,0,0])
         scence_forward: list (default: [-1,-1,-1])
         scence_background: list (default: [1,1,1])
+        colors: str, List[str], Tuple[str] (default: None):
+            Used to specify displayed filament color or override previously set color.
+            For multimaterial printing can provide a list of tuple of colors for each filament or if mixing a
+            gradient will be automatically created.
 
         """
-        position_history = [(d['CURRENT_POSITION']['X'], d['CURRENT_POSITION']['Y'], d['CURRENT_POSITION']['Z']) for d in history]
+        import vpython as vp
+
+        position_history = [(h['CURRENT_POSITION']['X'], h['CURRENT_POSITION']['Y'], h['CURRENT_POSITION']['Z']) for h in history]
         
         extruding_history = []
-        for d in history:
-            if any([isinstance(d['PRINTING'], list), isinstance(d['PRINTING'], tuple)]):
-                extruding_history.append(any(entry['value'] > 0 for entry in d['PRINTING'].values()))
+        for h in history:
+            if len(h['PRINTING']) == 0:
+                extruding_history.append(False)
             else:
-                extruding_history.append(d['PRINTING'])
-        speed_history = [d['PRINT_SPEED'] for d in history]
+                extruding_history.append(
+                    any(entry['value'] > 0 for entry in h['PRINTING'].values())
+                )
+
+        speed_history = [h['PRINT_SPEED'] for h in history]
         speed_history = [np.mean(speed_history) if v==0 else v for v in speed_history]
-        _, color_history, _ = _get_3d_styles(history)
+        _, color_history, _ = _get_3d_styles(history, colors=colors, **kwargs)
         
-        import vpython as vp
+        
         
         #Scene setup
         vp.scene.width = scene_dims[0]
@@ -633,6 +647,7 @@ def animation(history: List[dict],
 
         while True:
             if running:
+                print(f'frame #{frame} w/ color=', color_history[frame])
                 head.abs_move(endpoint=vp.vec(*position_history[frame]),
                                 feed=speed_history[frame],
                                 print_line=extruding_history[frame],
@@ -679,22 +694,29 @@ def _update_current_position(coordinates, prev_position, rel_mode):
 
     return {key: round(value, 6) for key, value in current_position.items()}
 
-def _get_3d_styles(history):
-    def create_linear_gradient_colormap(color1, color2, num_colors=256):
+def _get_3d_styles(history, colors, **kwargs):
+    def create_linear_gradient_colormap(color1, color2, num_colors=256 if 'num_colors' not in kwargs.keys() else kwargs['num_colors']):
+        print('numbcolors', num_colors)
         colors = [color1, color2]
         gradient_cmap = LinearSegmentedColormap.from_list('custom_gradient', colors, N=num_colors)
 
         return gradient_cmap
 
     linestyles = []
-    colors = []
+    color_history = []
+
     linewidths = []
     for h in history:
         # all extruders are off
-        all_off = all(entry['value'] == 0 for entry in h['PRINTING'].values())
+        if len(h['PRINTING']) == 0:
+            all_off = True
+        else:
+            all_off = all(entry['value'] == 0 for entry in h['PRINTING'].values())
+        
         if all_off:
+            print('hhhhhhh', h)
             linestyles.append(':')
-            colors.append((0,0,0))
+            color_history.append((0,0,0)) if h['COLOR'] is None else color_history.append(h['COLOR'])
             linewidths.append(1)
 
         else:
@@ -703,19 +725,40 @@ def _get_3d_styles(history):
 
             # NOTE: right now assuming only two extruders will be active at a time
             keys = sorted(h['PRINTING'].keys())
+
+            # if colors is not None and len(colors) != len(keys):
+            #     raise ValueError('number of colors does not match the number of extrusion sources:', keys)
+
             if len(keys) == 1:
-                colors.append((1,0,0)) # number b/w 0 and 256
+                if colors is not None:
+                    color_history.append(colors[0])
+                elif h['COLOR'] is not None:
+                    color_history.append(h['COLOR'])
+                else:
+                    color_history.append((1,0,0)) 
             elif len(keys) == 2:
                 ratio = h['PRINTING'][keys[0]]['value'] / (h['PRINTING'][keys[0]]['value'] + h['PRINTING'][keys[1]]['value'])
-                red_color = (1,0,0)
-                blue_color = (0,0,1)
-                gradient_cmap = create_linear_gradient_colormap(red_color, blue_color)
-                colors.append(gradient_cmap(ratio * 256)) # number b/w 0 and 256
-            # keys_greater_than_zero = [key for key, entry in h['PRINTING'].items() if entry['value'] > 0]
+                if colors is not None:
+                    if h['PRINTING'][keys[0]]['printing'] and not h['PRINTING'][keys[1]]['printing']:
+                        color_history.append(colors[0])
+                    elif not h['PRINTING'][keys[0]]['printing'] and h['PRINTING'][keys[1]]['printing']:
+                        color_history.append(colors[1])
+                    else:
+                        color_1 = colors[0]
+                        color_2 = colors[1]
+                        gradient_cmap = create_linear_gradient_colormap(color_1, color_2)
+                        color_history.append(gradient_cmap(int(ratio * gradient_cmap.N)))
+                elif h['COLOR'] is not None:
+                    color_history.append(h['COLOR'])
+                else:
+                    color_1 = (1,0,0)
+                    color_2 = (0,0,1)
+                    gradient_cmap = create_linear_gradient_colormap(color_1, color_2)
+                    color_history.append(gradient_cmap(int(ratio * gradient_cmap.N)))
             elif len(keys) > 2:
                 raise ValueError('only two colors / extruders are currently supported')
 
-    return linestyles, colors, linewidths
+    return linestyles, color_history, linewidths
 
 
 
