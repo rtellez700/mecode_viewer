@@ -456,7 +456,7 @@ def animation(history: List[dict],
                 extruding_history.append(False)
             else:
                 extruding_history.append(
-                    any(entry['value'] > 0 for entry in h['PRINTING'].values())
+                    any(entry['printing'] is True for entry in h['PRINTING'].values())
                 )
 
         speed_history = [h['PRINT_SPEED'] for h in history]
@@ -709,7 +709,7 @@ def _get_3d_styles(history, colors, **kwargs):
         if len(h['PRINTING']) == 0:
             all_off = True
         else:
-            all_off = all(entry['value'] == 0 for entry in h['PRINTING'].values())
+            all_off = all(entry['printing'] is False for entry in h['PRINTING'].values())
         
         if all_off:
             linestyles.append(':')
