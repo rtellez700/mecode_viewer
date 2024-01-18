@@ -713,7 +713,7 @@ def _get_3d_styles(history, colors, **kwargs):
         
         if all_off:
             linestyles.append(':')
-            color_history.append((0,0,0)) if h['COLOR'] is None else color_history.append(h['COLOR'])
+            color_history.append((0,0,0, 0.5)) # if h['COLOR'] is None else color_history.append(h['COLOR'])
             linewidths.append(1)
 
         else:
