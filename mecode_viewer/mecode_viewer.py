@@ -272,6 +272,7 @@ def plot3d(history: List[dict],
         ax:Optional[plt.axes] =None,
         cross_section:Optional[str] =None,
         colors:Optional[Union[str, List[str], Tuple[str]]] = None,
+        shape:Optional['str'] = 'filament',
         **kwargs) -> None:
     '''Generates a 3D matplotlib figure.
 
@@ -282,12 +283,14 @@ def plot3d(history: List[dict],
                             Mecode by default does this conversion for us
             - ax (plt.axes): Matplotlib axes reference
             - cross_section (str): To display only the `xy`-, `yz`-, or `xz`-planes
-            - colors (str, List[str], Tuple[str]): used to specify displayed filament color or override previously set color.
+            - colors (str, List[str], Tuple[str]): Used to specify displayed filament color or override previously set color.
                             For multimaterial printing can provide a list of tuple of colors for each filament or if mixing a
                             gradient will be automatically created.
-
+            - shape (str): Determines how to display extruded material. E.g., 'droplet' will display as drop instead of the default filament
+                            Must be one of ('filament', 'droplet')
     
     '''
+    valid_shapes = ('filament', 'droplet')
     manual_plot = True
     if ax is None:
         fig = plt.figure(dpi=150)
@@ -301,23 +304,42 @@ def plot3d(history: List[dict],
     y_pts = [h['CURRENT_POSITION']['Y'] for h in history] #[0]
     z_pts = [h['CURRENT_POSITION']['Z'] for h in history] #[0]
 
-    for j, h in enumerate(history[1:], 1):
-        segs.append(
-                [
-                    (history[j-1]['CURRENT_POSITION']['X'], history[j-1]['CURRENT_POSITION']['Y'], history[j-1]['CURRENT_POSITION']['Z']),
-                    (h['CURRENT_POSITION']['X'], h['CURRENT_POSITION']['Y'], h['CURRENT_POSITION']['Z'])
-                ]
-            )
+    if shape.strip().lower() == 'filament':
+        for j, h in enumerate(history[1:], 1):
+            segs.append(
+                    [
+                        (history[j-1]['CURRENT_POSITION']['X'], history[j-1]['CURRENT_POSITION']['Y'], history[j-1]['CURRENT_POSITION']['Z']),
+                        (h['CURRENT_POSITION']['X'], h['CURRENT_POSITION']['Y'], h['CURRENT_POSITION']['Z'])
+                    ]
+                )
 
-    linestyles, colors, linewidths = _get_3d_styles(history[1:], colors=colors, **kwargs)
+        linestyles, colors, linewidths = _get_3d_styles(history[1:], colors=colors, **kwargs)
 
-    line_segments = Line3DCollection(segs,
-                                     linewidths=linewidths,
-                                     colors=colors,
-                                     linestyles=linestyles
-                                     )
-    
-    ax.add_collection3d(line_segments)
+        line_segments = Line3DCollection(segs,
+                                        linewidths=linewidths,
+                                        colors=colors,
+                                        linestyles=linestyles
+                                        )
+        
+        ax.add_collection3d(line_segments)
+    elif shape.strip().lower() == 'droplet':
+        for j, h in enumerate(history[1:], 1):
+            any_on = any(entry['printing'] is True for entry in h['PRINTING'].values())
+            if any_on:
+                radius = kwargs['radius'] if 'radius' in kwargs else 0.2
+                # Center coordinates
+                center = (h['CURRENT_POSITION']['X'], h['CURRENT_POSITION']['Y'], h['CURRENT_POSITION']['Z'])
+
+                # Create a sphere
+                theta, phi = np.mgrid[0.0:2.0*np.pi:100j, 0.0:np.pi:50j]
+                x = center[0] + radius * np.sin(phi) * np.cos(theta)
+                y = center[1] + radius * np.sin(phi) * np.sin(theta)
+                z = center[2] + radius * np.cos(phi)
+            
+                ax.plot_surface(x, y, z, color=h['COLOR'] if h['COLOR'] else 'b', alpha=0.6)
+    else:
+        raise ValueError(f"Invalid shape. Must be one of {valid_shapes}")
+
 
     position_history = [d['COORDS'] for d in history]
 
