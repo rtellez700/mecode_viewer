@@ -1,9 +1,9 @@
 """
 #mecode_viewer() 
 """
-from os.path import isfile
+# from os.path import isfile
 from typing import Mapping, List, Optional, Dict
-from mpl_toolkits import mplot3d
+# from mpl_toolkits import mplot3d
 import numpy as np
 import matplotlib.pyplot as plt
 from gcode_helpers import get_accel_decel, get_print_mode, get_pressure_config, get_print_move, are_we_printing, get_xyz
@@ -222,7 +222,7 @@ def plot2d(history: List[dict],
         else:
             raise ValueError('The following cross_section is not supported. Only xy, yz, or xz are supported', cross_section)
 
-    linestyles, colors, linewidths = _get_3d_styles(history[1:], colors=colors, hide_travel, **kwargs)
+    linestyles, colors, linewidths = _get_3d_styles(history[1:], colors=colors, hide_travel=hide_travel, **kwargs)
 
     line_segments = LineCollection(segs,
                                      linewidths=linewidths,
@@ -317,7 +317,7 @@ def plot3d(history: List[dict],
                     ]
                 )
 
-        linestyles, colors, linewidths = _get_3d_styles(history[1:], colors=colors, hide_travel, **kwargs)
+        linestyles, colors, linewidths = _get_3d_styles(history[1:], colors=colors, hide_travel=hide_travel, **kwargs)
 
         line_segments = Line3DCollection(segs,
                                         linewidths=linewidths,
