@@ -167,6 +167,7 @@ def plot2d(history: List[dict],
         ax:Optional[plt.axes] =None,
         cross_section:Optional[str] ='xy',
         colors:Optional[Union[str, List[str], Tuple[str]]] = None,
+        hide_travel:Optional[bool] =False,
          **kwargs) -> None:
     '''Generates a 3D matplotlib figure.
 
@@ -179,6 +180,7 @@ def plot2d(history: List[dict],
             - colors (str, List[str], Tuple[str]): used to specify displayed filament color or override previously set color.
                             For multimaterial printing can provide a list of tuple of colors for each filament or if mixing a
                             gradient will be automatically created.
+            - hide_travel (bool): Determines whether or not to hide travel moves.
 
     
     '''
@@ -220,7 +222,7 @@ def plot2d(history: List[dict],
         else:
             raise ValueError('The following cross_section is not supported. Only xy, yz, or xz are supported', cross_section)
 
-    linestyles, colors, linewidths = _get_3d_styles(history[1:], colors=colors, **kwargs)
+    linestyles, colors, linewidths = _get_3d_styles(history[1:], colors=colors, hide_travel, **kwargs)
 
     line_segments = LineCollection(segs,
                                      linewidths=linewidths,
@@ -272,7 +274,8 @@ def plot3d(history: List[dict],
         ax:Optional[plt.axes] =None,
         cross_section:Optional[str] =None,
         colors:Optional[Union[str, List[str], Tuple[str]]] = None,
-        shape:Optional['str'] = 'filament',
+        shape:Optional[str] = 'filament',
+        hide_travel:Optional[bool] =False,
         **kwargs) -> None:
     '''Generates a 3D matplotlib figure.
 
@@ -288,6 +291,7 @@ def plot3d(history: List[dict],
                             gradient will be automatically created.
             - shape (str): Determines how to display extruded material. E.g., 'droplet' will display as drop instead of the default filament
                             Must be one of ('filament', 'droplet')
+            - hide_travel (bool): Determines whether or not to hide travel moves.
     
     '''
     valid_shapes = ('filament', 'droplet')
@@ -313,7 +317,7 @@ def plot3d(history: List[dict],
                     ]
                 )
 
-        linestyles, colors, linewidths = _get_3d_styles(history[1:], colors=colors, **kwargs)
+        linestyles, colors, linewidths = _get_3d_styles(history[1:], colors=colors, hide_travel, **kwargs)
 
         line_segments = Line3DCollection(segs,
                                         linewidths=linewidths,
@@ -716,7 +720,7 @@ def _update_current_position(coordinates, prev_position, rel_mode):
 
     return {key: round(value, 6) for key, value in current_position.items()}
 
-def _get_3d_styles(history, colors, **kwargs):
+def _get_3d_styles(history, colors, hide_travel, **kwargs):
     def create_linear_gradient_colormap(color1, color2, num_colors=256 if 'num_colors' not in kwargs.keys() else kwargs['num_colors']):
         colors = [color1, color2]
         gradient_cmap = LinearSegmentedColormap.from_list('custom_gradient', colors, N=num_colors)
@@ -736,7 +740,7 @@ def _get_3d_styles(history, colors, **kwargs):
         
         if all_off:
             linestyles.append(':')
-            color_history.append((0,0,0, 0.5)) # if h['COLOR'] is None else color_history.append(h['COLOR'])
+            color_history.append((0,0,0, 0.0 if hide_travel else 0.5)) # if h['COLOR'] is None else color_history.append(h['COLOR'])
             linewidths.append(1)
 
         else:
