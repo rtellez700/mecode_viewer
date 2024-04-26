@@ -2,3 +2,4 @@ gcode_helpers >= 0.3.0
 matplotlib
 numpy
 vpython
+pyvista

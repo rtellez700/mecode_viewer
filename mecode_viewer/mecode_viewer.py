@@ -18,6 +18,7 @@ import copy
 def mecode_viewer(file_name: str,
                   rel_mode: bool=False,
                   animate: bool=False,
+                  backend: str='3d',
                   verbose: bool=False,
                   raw_gcode: List[str]=None,
                   hide_plots: bool=False,
@@ -150,13 +151,28 @@ def mecode_viewer(file_name: str,
                     })
                     move_counter += 1
 
+
     if hide_plots is False:
-        if not animate:
-            plot3d(history, **kwargs)
-        elif animate:
-            animation(history, **kwargs)
+        if backend is not None:
+            match backend:
+                case '3d':
+                    plot3d(history, **kwargs)
+                case '2d':
+                    plot2d(history, **kwargs)
+                case 'animate':
+                    animation(history, **kwargs)
+                case 'vtk':
+                    vtk(history, **kwargs)
+                case _:
+                    plot3d(history, **kwargs)
         else:
-            raise ValueError("Invalid plotting backend! Choose one of mayavi or matplotlib or matplotlib2d or vpython.")
+            # legacy code
+            if not animate:
+                plot3d(history, **kwargs)
+            elif animate:
+                animation(history, **kwargs)
+            else:
+                raise ValueError("Invalid plotting backend! Choose one of mayavi or matplotlib or matplotlib2d or vpython.")
     
     if verbose:
         return history
@@ -395,6 +411,61 @@ def plot3d(history: List[dict],
             fig.savefig(outfile, dpi=500)
     else:
         return ax
+
+def vtk(history: List[dict],
+        outfile:Optional[str] =None,
+        mecode:Optional[bool] =False,
+        ax:Optional[plt.axes] =None,
+        cross_section:Optional[str] =None,
+        colors:Optional[Union[str, List[str], Tuple[str]]] = None,
+        shape:Optional[str] = 'filament',
+        hide_travel:Optional[bool] =False,
+        **kwargs) -> None:
+    '''Generates a VTK figure.
+
+        Args:
+            - history (List[dict]): List of printing, speed, color, extrusion, etc... history
+            - outfile (str): If specified, will save 3D matplotlib figure locally at `outfile`
+            - mecode (bool): If False will not attempt to calculate absolute coordinates from relative points.
+                            Mecode by default does this conversion for us
+            - ax (plt.axes): Matplotlib axes reference
+            - cross_section (str): To display only the `xy`-, `yz`-, or `xz`-planes
+            - colors (str, List[str], Tuple[str]): Used to specify displayed filament color or override previously set color.
+                            For multimaterial printing can provide a list of tuple of colors for each filament or if mixing a
+                            gradient will be automatically created.
+            - shape (str): Determines how to display extruded material. E.g., 'droplet' will display as drop instead of the default filament
+                            Must be one of ('filament', 'droplet')
+            - hide_travel (bool): Determines whether or not to hide travel moves.
+    
+    '''
+    import pyvista as pv
+
+    # origin
+    x_pts = [h['CURRENT_POSITION']['X'] for h in history] #[0]
+    y_pts = [h['CURRENT_POSITION']['Y'] for h in history] #[0]
+    z_pts = [h['CURRENT_POSITION']['Z'] for h in history] #[0]
+
+    points = np.column_stack((x_pts, y_pts, z_pts))
+
+    print('points', points)
+
+    def lines_from_points(points):
+        """Given an array of points, make a line set"""
+        poly = pv.PolyData()
+        poly.points = points
+        cells = np.full((len(points) - 1, 3), 2, dtype=np.int_)
+        cells[:, 1] = np.arange(0, len(points) - 1, dtype=np.int_)
+        cells[:, 2] = np.arange(1, len(points), dtype=np.int_)
+        poly.lines = cells
+        return poly
+    
+    line = lines_from_points(points)
+    line["scalars"] = np.arange(line.n_points)
+    tube = line.tube(radius=0.1)
+
+    tube.plot(smooth_shading=True)
+
+    # TODO: add color support for pyvista 
 
 def animation(history: List[dict],
               outfile:Optional[str] =None,
@@ -754,7 +825,9 @@ def _get_3d_styles(history, colors, hide_travel, **kwargs):
             #     raise ValueError('number of colors does not match the number of extrusion sources:', keys)
 
             if len(keys) == 1:
-                if colors is not None:
+                if colors is None:
+                    color_history.append((1,0,0)) 
+                elif colors is not None:
                     color_history.append(colors[0])
                 elif h['COLOR'] is not None:
                     color_history.append(h['COLOR'])
