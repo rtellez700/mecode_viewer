@@ -835,6 +835,8 @@ def _get_3d_styles(history, colors, hide_travel, **kwargs):
                     color_history.append((1,0,0)) 
             elif len(keys) == 2:
                 ratio = h['PRINTING'][keys[0]]['value'] / (h['PRINTING'][keys[0]]['value'] + h['PRINTING'][keys[1]]['value'])
+                ratio = 0 if np.isnan(ratio) else ratio
+                
                 if colors is not None:
                     if h['PRINTING'][keys[0]]['printing'] and not h['PRINTING'][keys[1]]['printing']:
                         color_history.append(colors[0])
@@ -845,7 +847,7 @@ def _get_3d_styles(history, colors, hide_travel, **kwargs):
                         color_2 = colors[1]
                         gradient_cmap = create_linear_gradient_colormap(color_1, color_2)
                         color_history.append(gradient_cmap(int(ratio * gradient_cmap.N)))
-                elif h['COLOR'] is not None:
+                elif 'COLOR' in h and h['COLOR'] is not None:
                     color_history.append(h['COLOR'])
                 else:
                     color_1 = (1,0,0)
