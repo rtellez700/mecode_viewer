@@ -479,6 +479,7 @@ def animation(history: List[dict],
               scene_dims = [720,720],
               scene_center = [0,0,0],
               scence_forward = [-1,-1,-1],
+              camera_pos = None,
               scence_background = [1,1,1],
               colors:Optional[Union[str, List[str], Tuple[str]]] = None,
               **kwargs):
@@ -569,6 +570,8 @@ def animation(history: List[dict],
         vp.scene.center = vp.vec(*scene_center) 
         vp.scene.forward = vp.vec(*scence_forward)
         vp.scene.background = vp.vec(*scence_background)
+        if camera_pos is not None:
+            vp.scene.camera.pos = vp.vec(*camera_pos)
 
         # position_hist = history
         # speed_hist = dict(self.speed_history)
@@ -836,7 +839,7 @@ def _get_3d_styles(history, colors, hide_travel, **kwargs):
             elif len(keys) == 2:
                 ratio = h['PRINTING'][keys[0]]['value'] / (h['PRINTING'][keys[0]]['value'] + h['PRINTING'][keys[1]]['value'])
                 ratio = 0 if np.isnan(ratio) else ratio
-                
+
                 if colors is not None:
                     if h['PRINTING'][keys[0]]['printing'] and not h['PRINTING'][keys[1]]['printing']:
                         color_history.append(colors[0])
