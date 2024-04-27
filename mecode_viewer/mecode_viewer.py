@@ -420,6 +420,7 @@ def vtk(history: List[dict],
         colors:Optional[Union[str, List[str], Tuple[str]]] = None,
         shape:Optional[str] = 'filament',
         hide_travel:Optional[bool] =False,
+        filament_diameter:Optional[float] =1.0,
         **kwargs) -> None:
     '''Generates a VTK figure.
 
@@ -440,32 +441,37 @@ def vtk(history: List[dict],
     '''
     import pyvista as pv
 
-    # origin
-    x_pts = [h['CURRENT_POSITION']['X'] for h in history] #[0]
-    y_pts = [h['CURRENT_POSITION']['Y'] for h in history] #[0]
-    z_pts = [h['CURRENT_POSITION']['Z'] for h in history] #[0]
-
-    points = np.column_stack((x_pts, y_pts, z_pts))
-
-    print('points', points)
-
     def lines_from_points(points):
         """Given an array of points, make a line set"""
         poly = pv.PolyData()
         poly.points = points
-        cells = np.full((len(points) - 1, 3), 2, dtype=np.int_)
-        cells[:, 1] = np.arange(0, len(points) - 1, dtype=np.int_)
-        cells[:, 2] = np.arange(1, len(points), dtype=np.int_)
-        poly.lines = cells
+
+        the_cell = np.arange(0, len(points), dtype=np.int_)
+        the_cell = np.insert(the_cell, 0, len(points))
+        poly.lines = the_cell
+
+
         return poly
-    
-    line = lines_from_points(points)
-    line["scalars"] = np.arange(line.n_points)
-    tube = line.tube(radius=0.1)
 
-    tube.plot(smooth_shading=True)
+    x_pts = np.array([h['CURRENT_POSITION']['X'] for h in history])
+    y_pts = np.array([h['CURRENT_POSITION']['Y'] for h in history])
+    z_pts = np.array([h['CURRENT_POSITION']['Z'] for h in history])
 
-    # TODO: add color support for pyvista 
+    splines = [np.column_stack((x_pts[L:R+1],y_pts[L:R+1],z_pts[L:R+1])) for L,R in _split_path_by_start_stop(history)]
+
+    # Create a MultiBlock dataset
+    multi_block = pv.MultiBlock()
+
+    # Add each spline as a separate block with its own color
+    for points in splines:
+        line = lines_from_points(points)    
+        line["scalars"] = np.arange(line.n_points)
+        tube = line.tube(radius=filament_diameter/2)
+
+        multi_block.append(tube)
+
+    # Plot the multi-block dataset
+    multi_block.plot(smooth_shading=True)
 
 def animation(history: List[dict],
               outfile:Optional[str] =None,
@@ -862,6 +868,23 @@ def _get_3d_styles(history, colors, hide_travel, **kwargs):
 
     return linestyles, color_history, linewidths
 
+def _split_path_by_start_stop(history):
+    # will be True if printing, False if not
+    printing_ids = [any([entry['printing'] is True and entry['value'] != 0 for entry in h['PRINTING'].values()]) for h in history]
+    printing_ids = [idx for idx, v in enumerate(printing_ids) if v is True]
+
+    # Find the indices where consecutive numbers change
+    split_indices = np.where(np.diff(printing_ids) != 1)[0] + 1
+
+    # Split the array at these indices
+    path_group_idxs = np.split(printing_ids, split_indices)
+
+    # Convert the result back to a list of lists
+    path_group_idxs = [list(subarr) for subarr in path_group_idxs]
+
+    path_group_idxs = [[idxs[0], idxs[-1]] for idxs in path_group_idxs]
+
+    return path_group_idxs
 
 
 # if __name__ == "__main__":
