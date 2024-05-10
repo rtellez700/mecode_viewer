@@ -566,7 +566,7 @@ def animation(history: List[dict],
 
         speed_history = [h['PRINT_SPEED'] for h in history]
         speed_history = [np.mean(speed_history) if v==0 else v for v in speed_history]
-        _, color_history, _ = _get_3d_styles(history, colors=colors, **kwargs)
+        _, color_history, _ = _get_3d_styles(history, colors=colors, hide_travel=hide_travel, **kwargs)
         
         
         
@@ -800,7 +800,7 @@ def _update_current_position(coordinates, prev_position, rel_mode):
 
     return {key: round(value, 6) for key, value in current_position.items()}
 
-def _get_3d_styles(history, colors, hide_travel, **kwargs):
+def _get_3d_styles(history, colors, hide_travel=False, **kwargs):
     def create_linear_gradient_colormap(color1, color2, num_colors=256 if 'num_colors' not in kwargs.keys() else kwargs['num_colors']):
         colors = [color1, color2]
         gradient_cmap = LinearSegmentedColormap.from_list('custom_gradient', colors, N=num_colors)
