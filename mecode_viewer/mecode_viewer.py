@@ -3,6 +3,7 @@
 """
 # from os.path import isfile
 from typing import Mapping, List, Optional, Dict
+from collections.abc import Iterable
 # from mpl_toolkits import mplot3d
 import numpy as np
 import matplotlib.pyplot as plt
@@ -811,7 +812,7 @@ def _get_3d_styles(history, colors, hide_travel=False, **kwargs):
     color_history = []
 
     linewidths = []
-    for h in history:
+    for j, h in enumerate(history):
         # all extruders are off
         if len(h['PRINTING']) == 0:
             all_off = True
@@ -834,14 +835,14 @@ def _get_3d_styles(history, colors, hide_travel=False, **kwargs):
             #     raise ValueError('number of colors does not match the number of extrusion sources:', keys)
 
             if len(keys) == 1:
-                if colors is None:
-                    color_history.append((1,0,0)) 
-                elif colors is not None:
-                    color_history.append(colors[0])
-                elif h['COLOR'] is not None:
+                if (colors is not None) and (len(colors)==1):
+                    color_history.append(colors)
+                elif (colors is None) and (h['COLOR'] is not None):
                     color_history.append(h['COLOR'])
+                elif isinstance(colors, Iterable):
+                    color_history.append(colors[j])
                 else:
-                    color_history.append((1,0,0)) 
+                    color_history.append((1.0, 0.647, 0.0)) # use orange-y color to signify something is weird here 
             elif len(keys) == 2:
                 ratio = h['PRINTING'][keys[0]]['value'] / (h['PRINTING'][keys[0]]['value'] + h['PRINTING'][keys[1]]['value'])
                 ratio = 0 if np.isnan(ratio) else ratio
