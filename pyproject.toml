@@ -8,12 +8,16 @@ dynamic = ["version"]
 description = "Simple GCode Viewer"
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.6"
+requires-python = ">=3.10"
 authors = [
     { name = "Rodrigo Telles", email = "rtelles@g.harvard.edu" },
 ]
 keywords = [
     "mecode_viewer",
+    "gcode viewer",
+    "multi-material visualization",
+    "3d printing",
+    "additive manufacturing"
 ]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
